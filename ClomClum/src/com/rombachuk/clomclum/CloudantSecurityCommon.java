@@ -31,7 +31,6 @@ public class CloudantSecurityCommon {
 	public static Boolean putCouchdbSecurityDocument (CloudantClient client,  JsonObject cluster, String dbid, JsonObject SecurityEntry) throws IOException {
         
 		String url = cluster.get("url").getAsString() + "/" + dbid + "/_security";
-		System.out.println("url="+url);
 	    	 HttpConnection response = client.executeRequest(Http.PUT(new URL(url), "application/json").setRequestBody(SecurityEntry.toString()));
 	         JsonObject result = (JsonObject) new JsonParser().parse(response.responseAsString());
  	     response.disconnect();
