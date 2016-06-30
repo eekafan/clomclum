@@ -11,7 +11,7 @@
 <li id="firstSidebarTemplates" class="firstSidebarSideMenuButton" onclick="var controller = new templateController();controller.getAll()" >Templates</li>
 <li id="firstSidebarPolicies" class="firstSidebarSideMenuButton" onclick="var controller = new policyController();controller.getAll()">Policies</li>
 <li id="firstSidebarDesignlists" class="firstSidebarSideMenuButton" onclick="var controller = new designlistController();controller.getAll()" >Design Lists</li>
-<li id="firstSidebarEncrypt" class="firstSidebarSideMenuButton" onclick="encryptCredentials()">Encrypt</li>
+<li id="firstSidebarEncrypt" class="firstSidebarSideMenuButton" onclick="var controller = new encryptController();controller.dialogue()">Encrypt</li>
 </ul></div></li>
 <li><div id="firstSidebarLogoContainer"><img id="firstSidebarLogo" src="images/clomclumlogo.png"></div></li>
 <li class="firstSidebarBottomBanner"></li>
@@ -34,5 +34,6 @@
 <script src="js/clomclum-designlistController.js"></script>
 <script src="js/clomclum-templateController.js"></script>
 <script src="js/clomclum-policyController.js"></script>
+<script src="js/clomclum-encryptController.js"></script>
 <script>var thisSession = new userSession(); thisSession.init();</script>
 </html>
