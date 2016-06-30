@@ -1,0 +1,28 @@
+<html><head><link rel="stylesheet" type="text/css" href="css/shellAppStyle.css"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head><body style="margin: 0px 0px 0px 0px">
+<div id="Pagecontainer">
+<div id="firstSidebar"><div class="item-container" id="firstSidebarContainer"><ul>
+<li class="firstSidebarTopButton"></li>
+<li><div id="firstSidebarSideMenu"><ul>
+<li id="firstSidebarEnterprise" class="firstSidebarSideMenuButton" onclick="var controller = new documentstoreController();controller.getAll('Enterprise')">Enterprise</li>
+<li id="firstSidebarTeam" class="firstSidebarSideMenuButton" onclick="var controller = new documentstoreController();controller.getAll('Team')">Team</li>
+<li id="firstSidebarPersonal" class="firstSidebarSideMenuButton" onclick="var controller = new documentstoreController();controller.getAll('Personal')">Personal</li>
+</ul></div></li>
+<li><div id="firstSidebarLogoContainer"><img id="firstSidebarLogo" src="images/clomclumlogo.png"></div></li>
+<li class="firstSidebarBottomBanner"></li>
+<li class="firstSidebarBottomButton" onclick="logout()">Logout</li>
+</ul></div></div>
+<div id="secondSidebar"><div class="item-container" id="secondSidebarContainer">
+<div id="secondSidebarTopMenu"></div>
+<div id="secondSidebarSideMenu"></div>
+</div></div>
+<div id="mainPanel"><div class="item-container" id="mainPanelContainer">
+<div id="mainPanelToolbarMenu"></div>
+<div id="mainPanelDataForms">
+</div></div></div>
+<div id="cleared"></div>
+</div>
+</body><script src="js/shellAppAjaxLibrary.js"></script>
+<script src="js/shellAppViewLibrary.js"></script>
+<script src="js/clomclum-documentstoreController.js"></script>
+<script>var thisSession = new userSession(); thisSession.init();</script>
+</html>

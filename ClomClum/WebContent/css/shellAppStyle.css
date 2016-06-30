@@ -1,0 +1,722 @@
+button, button:active, button.focus: {
+	  background-image: none;
+      outline: 0;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+}
+ul {
+	margin: 0;
+	padding: 0;
+}
+
+#login-body {
+  
+  margin: 0px;
+  background-color:#CBCBCB;
+  
+}
+#login-container {
+   font-family: Arial;
+}
+#login-box {
+  position: relative;
+  background-color: #FFF;
+  width: 300px ;
+  height: 150px;
+  padding: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 150px;
+  border: 2px solid blue;
+  
+}
+#login-form {
+  margin-left: 0px;
+}
+.login-option-input {
+  position: relative;
+  left: 5px;
+  width: 180px;
+  margin: 5px;
+}
+.login-signon-input {
+  position: relative;
+  left: 5px;
+  width: 80px;
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #389ae1;
+}
+.login-signon-input:hover {
+	background-color:#F3622D;
+}
+.login-text-para {
+  position: relative;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  font-size: 12px;
+}
+.login-invalid-text-para {
+  position: relative;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 50px;
+  font-size: 14px;
+}
+#Pagecontainer {
+  position: relative;
+  margin-left: 450px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  font-family: Source Sans Pro, sans-serif;
+}
+
+.item-container {
+  position: relative;
+}
+
+#firstSidebar {
+  float: left;
+  margin-left: -450px;
+  min-width: 200px;
+  max-width: 200px;
+  min-height: 300px;
+  height: 100%;
+  background-color: #163960;
+  overflow: hidden;
+}
+
+#cleared {
+  clear: both;
+}
+#firstSidebarSideMenu {
+  position: absolute;
+  top: 77px;
+  min-width: 200px;
+  max-width: 200px;
+  height: 500px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #163960;
+}
+.firstSidebarSideMenuButton {
+  position: relative;
+  min-width: 200px;
+  max-width: 200px;
+  height: 50px;
+  line-height: 50px;
+  background-color: #1F5887;
+  color: #FFF;
+  border-bottom: 1px solid navy;
+  font-size: 16px;
+  font-weight: normal;
+  vertical-align: middle; 
+  text-align: left; 
+  padding-left: 25px;
+  margin-left: 0;
+}
+.firstSidebarSideMenuButton-selected {
+  position: relative;
+  min-width: 200px;
+  max-width: 200px;
+  height: 50px;
+  line-height: 50px;
+  background-color: #F3622D;
+  color: #FFF;
+  border-bottom: 1px solid navy;
+  font-size: 16px;
+  font-weight: normal;
+  vertical-align: middle; 
+  text-align: left; 
+  padding-left: 25px;
+  margin-left: 0;
+}
+
+.firstSidebarSideMenuButton:hover {
+	background-color:#F3622D;
+	color: #FFF;
+}
+.firstSidebarTopButton {
+  position: absolute;
+  min-width: 200px;
+  max-width: 200px;
+  height: 76px;
+  background-color: #163960;
+  color: #FFF;
+  border-bottom: 1px solid navy;
+  margin-left: 0;
+}
+.firstSidebarBottomButton {
+  position: fixed;
+  left :0;
+  bottom: 0;
+  min-width: 190px;
+  max-width: 190px;
+  height: 40px;
+  line-height: 40px;
+  background-color: #163960;
+  color: #FFF;
+  border-top: 1px solid #6EDBFF;
+  font-size: 12px;
+  font-weight: normal;
+  vertical-align: center; 
+  text-align: left; 
+  padding-left: 10px;
+  margin-left: 0;
+}
+.firstSidebarBottomButton:hover{
+	background-color:#F3622D;
+	color: #FFF;
+}
+#firstSidebarLogoContainer {
+  position: absolute;
+  top: 600px;
+  min-width: 200px;
+  max-width: 200px;
+  min-height: 75px;
+  max-height: 75px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background-color: #163960;
+}
+#firstSidebarLogo {
+	max-width:70%; 
+    max-height:70%;
+    margin:auto;
+    display:block;
+}
+#secondSidebar {
+  float: left;
+  margin-left: -250px;
+  min-width: 250px;
+  max-width: 250px;
+  min-height: 300px;
+  height: 100%;
+  background-color: #FFF;
+  overflow: hidden;
+}
+#secondSidebarSideMenu {
+  position: absolute;
+  top: 77px;
+  min-width: 250px;
+  max-width: 250px;
+  height: 350px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #FFF;
+}
+.secondSidebarSideMenuButton {
+  position: relative;
+  width: 97%;
+  height: 49px;
+  background-color: #FFF;
+  color: #6495ED;
+  border: 1px solid #F2F2F2;
+  font-size: 16px;
+  vertical-align: middle; 
+  text-align: left;
+  padding-left: 15px;
+  margin: 0;
+  list-style-type: none;
+  line-height: 49px
+}
+
+.secondSidebarSideMenuButton-selected {
+  position: relative;
+  width: 97%;
+  height: 49px;
+  background-color: #F8F8F8;
+  color: #F3622D;
+  border: 1px solid #F2F2F2;
+  font-size: 16px;
+  vertical-align: middle; 
+  text-align: left;
+  padding-left : 15px;
+  margin: 0;
+  list-style-type: none;
+  line-height: 49px
+}
+.secondSidebarSideMenuActionButton {
+  position: relative;
+
+  right: 20px;
+  float: right;
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+  color: #6495ED;
+  padding: 0;
+  border: 0;
+  margin: 0px 0px 0px 0px;
+}
+
+.secondSidebarActionIcon {
+  display: block;
+  position: absolute;
+  max-width: 26px;
+  max-height: 26px;
+  padding: 10px;
+}
+
+.secondSidebarBackIcon {
+  display: block;
+  position: absolute;
+  max-width: 26px;
+  max-height: 26px;
+  padding: 10px;
+}
+
+.secondSidebarSideMenuButton-selected:hover, .secondSidebarSideMenuButton:hover {
+	color: #FFF;
+	background-color: #F3622D;
+}
+#secondSidebarTopMenu {
+  position: absolute;
+  min-width: 250px;
+  height: 75px;
+  background-color: #F7F7F7;
+  color: #666;
+   border-top: 1px solid #CCCCCC;
+  border-bottom: 1px solid #CCCCCC;
+}
+.secondSidebarTopMenuActionButton {
+  position: relative;
+  background-color: transparent;
+  margin: 0px 0px 0px 0px;
+}
+.secondSidebarTopMenuButtonBlank {
+  position: absolute;
+  min-width: 248px;
+  width: 248px;
+  height: 74px;
+  margin: 0;
+  list-style-type: none;
+  line-height: 75px;
+}
+.secondSidebarTopMenuButtonRight {
+  position: absolute;
+  right: 0px;
+  width: 28px;
+  padding-top: 16px;
+  padding-right: 15px;
+  height: 58px;
+  max-height: 75px;
+  border-left: 1px solid #CCCCCC;
+  margin: 0px 0px 0px 0px;
+  list-style-type: none;
+  line-height: 75px;
+}
+.secondSidebarTopMenuButtonCentre {
+  position: absolute;
+  right: 50px;
+  height: 70px;
+  max-height: 70px;
+  width: 138px;
+  font-size: 24px;
+  margin: 0;
+  list-style-type: none;
+  line-height: 75px;
+  padding-left: 20px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.secondSidebarTopMenuButtonLeft {
+  position: absolute;
+  left: 0px;
+  padding-top: 16px;
+  padding-right: 15px;
+  border-right: 1px solid #CCCCCC;
+  width: 28px;
+  height: 58px;
+  max-height: 75px;
+  margin: 0px 0px 0px 0px;
+  list-style-type: none;
+  line-height: 75px;
+}
+.SSdropdown {
+  position: absolute;
+  background-color: #E6E6E6;
+  color: #6495ED;
+  font-size: 13px;
+  left: -115px;
+  top:35px;
+  min-width: 115px;
+  overflow: visible;
+  z-index: 2;
+}
+.SSdropdown-li {
+  list-style-type: none;
+  min-height: 16px;
+  max-height: 16px;
+  line-height: 16px;
+  min-width: 115px;
+  text-align: left;
+  background-color: #202326;
+  color: #FFF;
+  overflow: visible;
+  padding: 10px;
+  border-bottom: 1px solid #1A1A1A;
+}
+.SSdropdown-li:hover {
+	background-color: #F3622D;
+}
+.SSdropdownOptionForm {
+  position: absolute;
+  background-color: #202326;
+  color: #FFF;
+  font-size: 13px;
+  right: 150px;
+  top: 0px;
+  min-width: 350px;
+  overflow: visible;
+  z-index: 2;
+}
+.SSdropdownForm {
+        background-color: #202326;
+        color: #FFF;
+	}
+.SSdropdownFormHeader {
+        margin-top: 5px;
+	    padding-top: 10px;
+	    font-size: 16px;
+}
+.SSdropdownInput {
+	    min-width: 250px;
+	    min-height: 20px;
+	    background-color: #202326;
+	    margin-top: 5px;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+	    font-size: 14px;
+        color: #FFF;
+}
+.SSdropdownChoice {
+	    min-width: 250px;
+	    min-height: 15px;
+	    background-color: #202326;
+	    font-size: 14px;
+        color: #FFF;
+}
+.SSdropdownInputLabel {
+	    background-color: #202326;
+	    margin-top: 5px;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+	    font-size: 14px;
+        color: #FFF;
+}
+.SSdropdownButton {
+	    min-height: 20px;
+		width: 50px;
+		background-color: #85e77b;
+        color: #000;
+}
+.SSdropdownText {
+	    background-color: #202326;
+	    max-width: 150px;
+	    margin-top: 5px;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+	    font-size: 14px;
+        color: #FFF;
+}
+.SSdropdownTable{
+	    margin-left: 5px;
+		width:95%; 
+		border-collapse:collapse; 
+	    overflow-y: visible;
+        overflow-x: visible;	
+        font-size: 16px;
+        background-color: #202326;
+        color: #FFF;
+	}
+
+.SSdropdownTable td{ 
+		padding:3px;
+	}
+
+.SSdropdownTable tr{ 
+	    margin-left: 5px;
+		background: #202326;;
+	}
+.SSresultBannerContainerSuccess {
+	position: fixed;
+	padding-left: 10px;
+	font-size: 24px;
+	left: 0;
+	top: 0;
+	min-height: 75px;
+	min-width: 100%;
+	background-color:#85e77b;
+}
+.SSresultBannerContainerFailure {
+	position: fixed;
+	padding-left: 10px;
+	font-size: 24px;
+	left: 0;
+	top: 0;
+	min-height: 75px;
+	min-width: 100%;
+	background-color:#D8724E;
+}
+.SSresultBanner {
+	position: relative;
+	padding-left: 100px;
+    min-height: 75px;
+	min-width: 100%;
+	font-size: 24px;
+	width: 100%
+        color: #FFF;
+        list-style-type: none;
+}
+
+#mainPanel {
+  float: left;
+  min-width: 100px;
+  min-height: 300px;
+  width: 100%;
+  height: 100%;
+  background-color: #E8E8E8;
+  border-left: 1px solid #CCCCCC;
+}
+#mainPanelToolbarMenu {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 75px;
+  min-height: 75px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0;
+  margin: 0;
+  background-color: #F7F7F7;
+  border-top: 1px solid #CCCCCC;  
+  border-bottom: 1px solid #CCCCCC; 
+  list-style-type: none; 
+}
+#mainPanelToolbarMenuList {
+    list-style-type: none;
+    position: absolute;
+}
+.mainPanelToolbarBanner {
+  float:left;
+  height: 75px;
+  line-height: 75px;
+  padding-left: 25px;
+  background-color: #F7F7F7;
+  color: #666;
+  text-align: left;
+  font-size: 24px;
+  list-style-type: none;
+}
+
+.mainPanelToolbarButton {
+  float: right;
+  position: relative;
+  min-width: 150px;
+  max-width: 150px;
+  min-height: 75px;
+  max-height: 75px;
+  margin-right: 10px;
+  overflow: visible;
+  background-color: #F7F7F7;
+  border-left: 1px solid #CCCCCC;
+  border-right: 1px solid #CCCCCC;
+}
+.mainPanelToolbarIcon{
+	max-width:80%; 
+	max-height:60%;
+	padding-top: 15px; 
+    margin:auto;
+    overflow: visible;
+    display:block;
+}
+
+.MPTdropdown {
+  position: absolute;
+  background-color: #202326;
+  color: #FFF;
+  font-size: 13px;
+  right: 150px;
+  top: 0px;
+  min-width: 350px;
+  overflow: visible;
+  z-index: 2;
+}
+.MPTdropdown-li {
+  list-style-type: none;
+  min-height: 16px;
+  max-height: 16px;
+  line-height: 16px;
+  min-width: 115px;
+  text-align: left;
+  background-color: #202326;
+  color: #FFF;
+  overflow: visible;
+  padding: 10px;
+}
+.MPTdropdown-li:hover {
+	background-color: #F3622D;
+}
+.MPTdropdownForm {
+        background-color: #202326;
+        color: #FFF;
+	}
+.MPTdropdownInput {
+	    min-width: 250px;
+	    min-height: 20px;
+	    background-color: #202326;
+	    margin-top: 5px;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+        color: #FFF;
+}
+.MPTdropdownChoice {
+	    min-width: 250px;
+	    min-height: 20px;
+	    background-color: #202326;
+	    margin-top: 5px;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+        color: #FFF;
+}
+.MPTdropdownInputLabel {
+	    background-color: #202326;
+	    margin-top: 5px;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+	    font-size: 14px;
+        color: #FFF;
+}
+.MPTdropdownButton {
+	    min-height: 20px;
+		width: 50px;
+		background-color: #85e77b;
+        color: #000;
+}
+.MPTdropdownTable{
+	    margin-left: 5px;
+		width:95%; 
+		border-collapse:collapse; 
+	    overflow-y: visible;
+        overflow-x: visible;	
+        font-size: 16px;
+        background-color: #202326;
+        color: #FFF;
+	}
+.MPTdropdownHelp{
+	    margin-left: 5px;
+	    min-width: 950px;
+	    min-height: 350px;
+		width:95%; 
+		border-collapse:collapse; 
+	    overflow-y: visible;
+        overflow-x: visible;	
+        font-size: 16px;
+        background-color: #e5e5e5;
+        color: #FFF;
+	}
+
+.MPTdropdownTable td{ 
+		padding:3px;
+	}
+
+.MPTdropdownTable tr{ 
+	    margin-left: 5px;
+		background: #202326;;
+	}
+.MPTresultBannerContainerSuccess {
+	position: fixed;
+	padding-left: 10px;
+	font-size: 24px;
+	left: 0;
+	top: 0;
+	min-height: 75px;
+	min-width: 100%;
+	background-color:#85e77b;
+}
+.MPTresultBannerContainerFailure {
+	position: fixed;
+	padding-left: 10px;
+	font-size: 24px;
+	left: 0;
+	top: 0;
+	min-height: 75px;
+	min-width: 100%;
+	background-color:#D8724E;
+}
+.MPTresultBanner {
+	position: relative;
+	padding-left: 100px;
+    min-height: 75px;
+	min-width: 100%;
+	font-size: 24px;
+	width: 100%
+        color: #FFF;
+        list-style-type: none;
+}
+
+
+#mainPanelDataForms {
+  position: absolute;
+  top: 78px;
+  left: 0px;
+  width: 100%;
+  height: 650px;
+  padding-top: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #F2F2F2;
+}
+
+	.MainPanelTable{
+	    margin-left: 30px;
+		width:95%; 
+		border-collapse:collapse; 
+	    overflow-y: auto;
+        overflow-x: hidden;	
+        font-size: 16px;
+	}
+		
+    .MainPanelTable th{ 
+		padding:7px;
+		text-align: left;
+		border-bottom: 3px black solid;
+	}
+	
+	.MainPanelTable td{ 
+		padding:7px;
+		
+	}
+
+	.MainPanelTable-tr-odd{ 
+	    margin-left: 30px;
+		background: #E6E6E6;
+	}
+
+	.MainPanelTable-tr-even{
+		background: #F7F7F7;
+	}
+	
+.mainPanelTableButtonOdd {
+  
+  background-color: #E6E6E6;
+  color: #08C;
+  font-size: 16px;
+  border: 0px;
+}
+.mainPanelTableButtonEven {
+  
+  background-color: #FAFAFA;
+  color: #08C;
+  font-size: 16px;
+  border: 0px;
+}
+
+
