@@ -180,9 +180,7 @@
 		<url-pattern>/documentstore/manage</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-		<servlet-name>
-			com.rombachuk.clomclum.clusterServlet
-		</servlet-name>
+		<servlet-name>com.rombachuk.clomclum.clusterServlet</servlet-name>
 		<url-pattern>/_all_clusters</url-pattern>
 		<url-pattern>/_all_clusters/add</url-pattern>
 		<url-pattern>/cluster</url-pattern>

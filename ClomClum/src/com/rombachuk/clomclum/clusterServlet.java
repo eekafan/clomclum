@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 
 import com.cloudant.client.api.CloudantClient;
 import com.cloudant.client.api.Database;
+import com.cloudant.client.api.model.DesignDocument;
 import com.cloudant.client.api.model.Response;
 import com.cloudant.client.api.views.Key;
 import com.cloudant.client.api.views.ViewRequest;
@@ -304,7 +305,7 @@ private static JsonObject modifyCluster(Database thisDB, JsonObject inputs)  thr
         	return(result);
    }
 	
-	private static JsonObject syncClusterDocumentstores (Database registryDB, ServletContext ctx, String clusterId) throws IOException {
+	private static JsonObject syncClusterDocumentstoreSecurityDocs (Database registryDB, ServletContext ctx, String clusterId) throws IOException {
 		JsonObject result = new JsonObject();
 		int errorcount = 0;
         try {
@@ -314,7 +315,7 @@ private static JsonObject modifyCluster(Database thisDB, JsonObject inputs)  thr
 		List<String> managedkeys = new ArrayList<String>();
 		managedkeys.add(clusterId); managedkeys.add("managed");
 		List<JsonObject> ManagedDbs = CloudantJsonObjectUtils.viewResultDocsAsJSON(registryDB,"views/managedstatus",managedkeys);
-        for (JsonObject db : ManagedDbs) {
+         for (JsonObject db : ManagedDbs) {
         	if (db.has("syncmaster")) {
         		System.out.println("Syncing Cluster ["+clusterId+"] Db ["+db.get("dbid").getAsString() +
         				"] RegistryRecord ["+db.get("_id").getAsString()+"]");
@@ -338,11 +339,12 @@ private static JsonObject modifyCluster(Database thisDB, JsonObject inputs)  thr
            			}
           		}
         	}
+          }
         }
-        }
-        finally {
-        	
-        }		    			
+    	catch (com.cloudant.client.org.lightcouch.CouchDbException e) {
+			System.out.println("Reached this error: "+e);
+			errorcount++;
+		}    			
     	
          if (errorcount == 0) {
         	 result.addProperty("result","Success"); 
@@ -353,6 +355,56 @@ private static JsonObject modifyCluster(Database thisDB, JsonObject inputs)  thr
        	 return(result);
 	}
 	
+	private static JsonObject syncClusterDocumentstoreDesignDocs ( Database registryDB, ServletContext ctx, String clusterId) throws IOException {
+		JsonObject result = new JsonObject();
+		int errorcount = 0;
+        try {
+		JsonObject clusterDetails = registryDB.find(JsonObject.class,clusterId);
+		CloudantClient clusterClient = CloudantSecurityCommon.getCloudantClientForCluster (registryDB,ctx,clusterId);
+		
+		
+		List<String> managedkeys = new ArrayList<String>();
+		managedkeys.add(clusterId); managedkeys.add("managed");
+		List<JsonObject> ManagedDbs = CloudantJsonObjectUtils.viewResultDocsAsJSON(registryDB,"views/managedstatus",managedkeys);
+         for (JsonObject db : ManagedDbs) {
+        	 System.out.println("Syncing Cluster Design Docs for ["+clusterId+"] Db ["+db.get("dbid").getAsString() +
+     				"] RegistryRecord ["+db.get("_id").getAsString()+"]");
+        	if (db.has("creationDesignlist")) {
+        		JsonObject designlist = registryDB.find(JsonObject.class,db.getAsJsonObject("creationDesignlist").get("_id").getAsString()); // find latest list from registry	
+	        	Database thisdb = clusterClient.database(db.get("dbid").getAsString(), false);
+	        	if (thisdb.getDBUri() != null) { // test if db exists in cluster
+        		 for (int i=0; i<designlist.getAsJsonArray("list").size(); i++ ) {
+        			 DesignDocument thisdoc = registryDB.getDesignDocumentManager().get(designlist.getAsJsonArray("list").get(i).getAsString());
+        			 if (thisdoc.getId() != null) {
+        			   thisdoc.setRevision(null); // null the revision ready for new addition to the db
+        			   try {
+		        	   Response putResult = thisdb.getDesignDocumentManager().put(thisdoc);
+        			   }
+        			   catch (com.cloudant.client.org.lightcouch.CouchDbException e) {
+        					System.out.println("Put designdoc Reached this error: "+e);
+        					errorcount++;
+        				} 
+        			 }
+        		 }
+	        	}
+        	}
+          }
+         clusterClient.shutdown();
+        }
+    	catch (com.cloudant.client.org.lightcouch.CouchDbException e) {
+			System.out.println("Reached this error: "+e);
+			errorcount++;
+		}    			
+    	
+         if (errorcount == 0) {
+        	 result.addProperty("result","Success"); 
+         } else {
+    	 result.addProperty("result","Failure");
+       	 result.addProperty("reason","Sync error detected for "+errorcount+" Documentstores");
+         }
+         
+       	 return(result);
+	}
      
 	
 	private static String buildResponseToScopeAllRequest (Database registryDB, List<String> keys) throws  IOException {
@@ -464,7 +516,7 @@ private static JsonObject modifyCluster(Database thisDB, JsonObject inputs)  thr
 			    		     }
 		    		}
 		    		if (endpointComponents.get(1).equals("syncsecurity")) {
-		    			JsonObject syncDocsResult = syncClusterDocumentstores(registryDB, ctx, inputs.get("id").getAsString());
+		    			JsonObject syncDocsResult = syncClusterDocumentstoreSecurityDocs(registryDB, ctx, inputs.get("id").getAsString());
 		    			if (syncDocsResult.has("result")) {
 		    				if (syncDocsResult.get("result").getAsString().equals("Success")) {
 		    					JsonObject syncUsersResult = syncClusterUsers(registryDB,ctx, inputs.get("id").getAsString(), "all");
@@ -473,6 +525,9 @@ private static JsonObject modifyCluster(Database thisDB, JsonObject inputs)  thr
 		    					response = syncDocsResult.toString();
 		    				}	    					
 		    			}
+		    		}
+		    		if (endpointComponents.get(1).equals("syncdesign")) {
+		    			response = syncClusterDocumentstoreDesignDocs(registryDB, ctx, inputs.get("id").getAsString()).toString();
 		    		}
 		    		if (endpointComponents.get(1).equals("modify")) {
 		    		     response = modifyCluster(registryDB, inputs).toString();    					
