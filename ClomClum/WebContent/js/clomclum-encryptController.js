@@ -10,16 +10,12 @@ encryptController.prototype.dialogue = function () {
     var self=this;
 	 
 	 var ss = new secondsidebar(); ss.collapse();
-	 var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-	 var ssMenu = new secondsidebarMenu(); ssMenu.init();
 
-
-	 var mpToolbar = new mainpanelToolbar();  mpToolbar.init();
-	 mpToolbar.setBanner('Encrypted Credentials');
+	 var mpToolbar = new mainpanelToolbar({banner:'Encrypted Credentials'}); 
+	 mpToolbar.load();
 	
-     var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-     var tableid = 'mainPanelEncrypt';
-     mpDataForms.addTable(tableid);
+     var mpDataForms = new mainpanelDataForms({ tables: [{id :'mainPanelEncrypt', header: [], rows:[]}]});
+     mpDataForms.load();
 	 
 	    var mpTable = document.getElementById('mainPanelEncrypt');
 	    mpTable.innerHTML = "";

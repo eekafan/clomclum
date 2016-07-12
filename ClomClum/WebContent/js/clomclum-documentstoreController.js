@@ -11,30 +11,32 @@ documentstoreController.prototype.getAll = function(appscope) {
 	     var self=this;
 		 
 		 var ss = new secondsidebar(); ss.collapse();
-		 var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		 var ssMenu = new secondsidebarMenu(); ssMenu.init();
+	
+		 var appscopeChoice = new Array(0); appscopeChoice.push(appscope);
+		 var mpToolbar = new mainpanelToolbar({
+			 banner: appscope + ' Document Stores',
+			 options: [{id:'AddDocumentstore',icon:'addnewdocumentstore.png', 
+				        clickform: {type: 'addForm', parameters: {
+				          header:'Add Documentstore',
+			              submit:{label:'Create',onclick:function(){self.add();}},
+	                      inputs:[{id:'name',label:'name',prompt:'Please enter name for this documentstore'},
+	                              {id:'appscope',label:'scope',choices:appscopeChoice},
+                                  {id:'clustertype',label:'clustertype',choices:['cloudant-dbaas', 'cloudant-local']},
+                                  {id:'securitytype',label:'securitytype',choices:['dbaas', 'couchdb']},
+                                  {id:'version',label:'version',prompt:'Please enter software version for this cluster'}]
+				        }}},
+			           {id:'DocumentstoreHelp',icon:'help.png', 
+	                    clickform: {type: 'helpForm', parameters: {
+	                        header:'Documentstore Help', 
+	                        submit:{label:'Finish'}, helpfile: 'help/documentstorehelp.html'}}
+			            }]});	 
+			 mpToolbar.load();
 
-		 var mpToolbar = new mainpanelToolbar();  mpToolbar.init();
-		 mpToolbar.setBanner(appscope +' Documentstores');
-		 mpToolbar.addOption('AddDocumentstore','addnewdocumentstore.png', 'Add Documentstore');
-         mpToolbar.addOptionInput('AddDocumentstore','name','name','addPrompt','Please enter name for this documentstore');
-         var appscopeChoice = new Array(0); appscopeChoice.push(appscope);
-    	 mpToolbar.addOptionInput('AddDocumentstore','appscope','appscope','addChoice',appscopeChoice);	
-		 mpToolbar.addOptionSubmit('AddDocumentstore','Create',function() {self.add()});
-		 mpToolbar.setOptionClick('AddDocumentstore','addForm');
-		 mpToolbar.addOption('DocumentstoreHelp','help.png', 'Documentstores Help');
-		 mpToolbar.setOptionHelpfile('DocumentstoreHelp','help/documentstorehelp.html');
-		 mpToolbar.addOptionSubmit('DocumentstoreHelp','Finish',function() {self.bldform.dropdownDestroyAll()});
-		 mpToolbar.setOptionClick('DocumentstoreHelp','helpForm');  
-		 
-	     var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	     var tableid = 'mainPanelAllDocumentstores';
-	     mpDataForms.addTable(tableid);
-	     mpDataForms.tables[tableid].addHeader(tableid,1,4);
-	     mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	     mpDataForms.tables[tableid].setCell(tableid,0,1,'DB Name');
-	     mpDataForms.tables[tableid].setCell(tableid,0,2,'#Docs');
-	     mpDataForms.tables[tableid].setCell(tableid,0,3,'Doc Limit');
+
+	     var mpDataForms = new mainpanelDataForms({
+			    	 tables: [{id:'mainPanelAllDocumentstores', 
+			    		 header: [{titles:['Name','DB name','#Docs','Doc Limit']}],rows: []}]
+			    	         });
 
 		  var req = newXMLHttpRequest();
 		  req.onreadystatechange = getReadyStateHandler(req, 
@@ -56,14 +58,15 @@ documentstoreController.prototype.getAll = function(appscope) {
 		         var docstoreId = items[i].dbid;
 		         var docnumber = 0;
 		         var doclimit = items[i].doclimit;
-
-		       mpDataForms.tables[tableid].addRow(tableid,parseInt(i) + 1,4);
-		       mpDataForms.tables[tableid].setCellAsButton(tableid,parseInt(i) + 1,0,name,get(appscope,documentstoreid,name));
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,1,docstoreId); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,2,docnumber); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,3,doclimit); 
-
+		         
+			      mpDataForms.addRow('mainPanelAllDocumentstores',
+		                   {cells : [{type: 'button', text: name, onclick: get(appscope,documentstoreid,name)},
+                                    {type: 'text'  , text: docstoreId},
+                                    {type: 'text'  , text: docnumber},
+                                    {type: 'text'  , text: doclimit}]                              
+		                   });
 		     }
+		     mpDataForms.load();
 		    }, self.session.logout);
 		  window.location.hash = "/_all_documentstores/"+appscope+"/";
 		  req.open("POST", "_all_documentstores?appscope="+appscope, true);
@@ -77,75 +80,67 @@ documentstoreController.prototype.get = function (appscope,documentstoreid,name)
 	       var self=this;	
 	       
 		   var ss = new secondsidebar(); ss.expand();
-		   var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		     ssToolbar.setLeftButtonClick(function() {self.getAll(appscope)});
-		     ssToolbar.setBanner(name);
-		 
-			 ssToolbar.addAction('removeDocumentstore', 'Remove');
-			 ssToolbar.setActionRemoveParameters('removeDocumentstore','Remove Documentstore','mainPanelDocumentstore',name,
-			 'Please confirm removal of this documentstore from the Registry by typing its name in the box below and clicking on confirm', 'documentstore name');
-			 ssToolbar.addActionCancel('removeDocumentstore','Cancel',
-					 function() {ssDropdownResultBuild ('Failure','Documentstore Not Removed: Cancelled by User')});
-			 ssToolbar.addActionSubmit('removeDocumentstore','Confirm',function() {self.remove(appscope,documentstoreid,name)});
-			 ssToolbar.setActionClick('removeDocumentstore','removeForm');
 		   
-		     ssToolbar.addAction('modifyDocumentstore', 'Modify');
-		     ssToolbar.setActionModifyParameters('modifyDocumentstore','Modify Documentstore', 'mainPanelDocumentstore',name, 1);
-		     ssToolbar.addActionInput('modifyDocumentstore','syncmaster','syncmaster','modifyChoice',['registry','database'],7);
- 	         ssToolbar.addActionSubmit('modifyDocumentstore','Save',function() {self.modify(appscope,documentstoreid,name)});
-		     ssToolbar.setActionClick('modifyDocumentstore','modifyForm');
+		   var ssToolbar = new secondsidebarToolbar({
+			     leftbutton: {onclick:function() {self.getAll(appscope)}},
+				 banner: name,
+				 rightbutton: { id:'Toolbar',
+					            actions: [{id:'removeDocumentstore', label:'Remove', 
+					            	       clickform:{type: 'removeForm', parameters : { 
+					                    	   header:'Remove Documentstore',currentdata:'mainPanelDocumentstore',removeobject:name, inputlabel:'documentstore name',
+					                       warning:'Please confirm removal of this documentstore from the Registry by typing its name in the box below and clicking on confirm',
+					                           submit:{label:'Confirm', onclick: function() {self.remove(appscope,documentstoreid,name);}},
+				                               cancel:{label:'Cancel',text:'Documentstore Not Removed: Cancelled by User'}}}},
+				                           {id:'modifyDocumentstore', label:'Modify', 
+				                            clickform:{type: 'modifyForm', parameters : { 
+							                   header:'Modify Documentstore',currentdata:'mainPanelDocumentstore',modifyobject:name, currentrow: 1,
+							                   submit:{label:'Save', onclick: function() {self.modify(appscope,documentstoreid,name);}},
+						                       inputs: [{id: 'syncmaster', label: 'syncmaster', type: 'modifyChoice', data: ['registry','database'], currentindex: 7}
+						                       ]}}},
+								           {id:'modifyRolesDocumentstore', label:'Modify Roles', 
+						                     clickform:{type: 'modifyForm', parameters : { 
+									            header:'Modify Documentstore',currentdata:'mainPanelDocumentstorePermissions',modifyobject:name, currentrow: 2,
+									            submit:{label:'Save', onclick: function() {self.modify_roles(appscope,documentstoreid,name);}},
+								                inputs: [{id: 'adminroles', label: 'admin roles', type: 'modifyValue', data: null, currentindex: 0},
+								                         {id: 'adminusers', label: 'admin users', type: 'modifyValue', data: null, currentindex: 1},
+								                         {id: 'memberroles', label: 'member roles', type: 'modifyValue', data: null, currentindex: 2},
+								                         {id: 'memberusers', label: 'member users', type: 'modifyValue', data: null, currentindex: 3}
+						                       ]}}}]
+				               }});	  
+		   ssToolbar.load();
+		   
+		   var ssMenu = new secondsidebarMenu({
+	           options: [{id:'ClusterEdit',label: 'Edit', 
+	        	          actions: [{id:'modifyDocumentstore', label:'Modify', 
+	                                  clickform:{type: 'modifyForm', parameters : { 
+					                   header:'Modify Documentstore',currentdata:'mainPanelDocumentstore',modifyobject:name, currentrow: 1,
+					                   submit:{label:'Save', onclick: function() {self.modify(appscope,documentstoreid,name);}},
+				                       inputs: [{id: 'syncmaster', label: 'syncmaster', type: 'modifyChoice', data: ['registry','database'], currentindex: 7}
+				                       ]}}},
+						            {id:'modifyRolesDocumentstore', label:'Modify Roles', 
+				                     clickform:{type: 'modifyForm', parameters : { 
+							            header:'Modify Documentstore',currentdata:'mainPanelDocumentstorePermissions',modifyobject:name, currentrow: 2,
+							            submit:{label:'Save', onclick: function() {self.modify_roles(appscope,documentstoreid,name);}},
+						                inputs: [{id: 'adminroles', label: 'admin roles', type: 'modifyValue', data: null, currentindex: 0},
+						                         {id: 'adminusers', label: 'admin users', type: 'modifyValue', data: null, currentindex: 1},
+						                         {id: 'memberroles', label: 'member roles', type: 'modifyValue', data: null, currentindex: 2},
+						                         {id: 'memberusers', label: 'member users', type: 'modifyValue', data: null, currentindex: 3}
+				                                ]}}}]},
+				          {id:'DocumentstoreSettings', label: 'Settings', onclick: function() {self.get(appscope,documentstoreid,name)}},
+	                     ]});
+	       ssMenu.load();
 		     
-		     ssToolbar.addAction('modifyRolesDocumentstore', 'Modify Roles');
-		     ssToolbar.setActionModifyParameters('modifyRolesDocumentstore','Modify Documentstore Roles', 'mainPanelDocumentstorePermissions',name, 2);
-		     ssToolbar.addActionInput('modifyRolesDocumentstore','adminroles','admin roles','modifyValue',null,0);
-		     ssToolbar.addActionInput('modifyRolesDocumentstore','adminusers','admin users','modifyValue',null,1);
-		     ssToolbar.addActionInput('modifyRolesDocumentstore','memberroles','member roles','modifyValue',null,2);
-		     ssToolbar.addActionInput('modifyRolesDocumentstore','memberusers','member users','modifyValue',null,3);	
- 	         ssToolbar.addActionSubmit('modifyRolesDocumentstore','Save',function() {self.modify_roles(appscope,documentstoreid,name)});
-		     ssToolbar.setActionClick('modifyRolesDocumentstore','modifyForm');	
-		     
-		     ssToolbar.setRightButtonClick(function() {self.bldform.dropdownForm(ssToolbar.rightButton)});
-		     
-		     
-		   var ssMenu = new secondsidebarMenu(); ssMenu.init();
-		     ssMenu.addOption('DocumentstoreEdit','Edit','hasactions');
-	     
-		     ssMenu.options['DocumentstoreEdit'].addAction('modifyDocumentstore', 'Modify');
-		     ssMenu.options['DocumentstoreEdit'].setActionModifyParameters('modifyDocumentstore','Modify Documentstore', 'mainPanelDocumentstore',name, 1);
-		     ssMenu.options['DocumentstoreEdit'].addActionInput('modifyDocumentstore','syncmaster','syncmaster','modifyChoice',['registry','database'],7);
-		     ssMenu.options['DocumentstoreEdit'].addActionSubmit('modifyDocumentstore','Save',function() {self.modify(appscope,documentstoreid,name)});	
-		     ssMenu.options['DocumentstoreEdit'].setActionClick('modifyDocumentstore','modifyForm');
-		     
-		     ssMenu.options['DocumentstoreEdit'].addAction('modifyRolesDocumentstore', 'Modify Roles');  
-		     ssMenu.options['DocumentstoreEdit'].setActionModifyParameters('modifyRolesDocumentstore','Modify Documentstore Roles', 'mainPanelDocumentstorePermissions',name, 2);
-		     ssMenu.options['DocumentstoreEdit'].addActionInput('modifyRolesDocumentstore','adminroles','admin roles','modifyValue',null,0);
-		     ssMenu.options['DocumentstoreEdit'].addActionInput('modifyRolesDocumentstore','adminusers','admin users','modifyValue',null,1);
-		     ssMenu.options['DocumentstoreEdit'].addActionInput('modifyRolesDocumentstore','memberroles','member roles','modifyValue',null,2);
-		     ssMenu.options['DocumentstoreEdit'].addActionInput('modifyRolesDocumentstore','memberusers','member users','modifyValue',null,3);
-		     ssMenu.options['DocumentstoreEdit'].addActionSubmit('modifyRolesDocumentstore','Save',function() {self.modify_roles(appscope,documentstoreid,name)});
-		     ssMenu.options['DocumentstoreEdit'].setActionClick('modifyRolesDocumentstore','modifyForm');	
-		     ssMenu.options['DocumentstoreEdit'].setClick(function() {self.bldform.dropdownForm(ssMenu.options['DocumentstoreEdit'])});
 		
-		    var mpToolbar = new mainpanelToolbar(); mpToolbar.init();
+			var mpToolbar = new mainpanelToolbar({ banner:'' });
+			mpToolbar.load();
+		
+			var mpDataForms = new mainpanelDataForms({
+			    	 tables: [{id:'mainPanelDocumentstore', 
+			    		 header: [{titles:['Name','Scope','#Docs','Doc Limit','Security Type','Cluster','DB name','Master for sync']}],rows: [], spacer:{rows:2}},
+			    		      {id:'mainPanelDocumentstorePermissions',
+			    	     header: [],rows:[]}
+			    		     ]});
 
-	        var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	         var tableid = 'mainPanelDocumentstore';
-	         mpDataForms.addTable(tableid);
-	         mpDataForms.tables[tableid].addHeader(tableid,1,8);
-	         mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	         mpDataForms.tables[tableid].setCell(tableid,0,1,'Scope');
-	         mpDataForms.tables[tableid].setCell(tableid,0,2,'#Docs');
-	         mpDataForms.tables[tableid].setCell(tableid,0,3,'DocLimit');
-	         mpDataForms.tables[tableid].setCell(tableid,0,4,'Security Type');
-	         mpDataForms.tables[tableid].setCell(tableid,0,5,'Cluster');
-	         mpDataForms.tables[tableid].setCell(tableid,0,6,'DB name');
-	         mpDataForms.tables[tableid].setCell(tableid,0,7,'Master for sync');
-	         
-	         mpDataForms.addSpacer(2);
-	         
-	         var table2 = 'mainPanelDocumentstorePermissions';
-	         mpDataForms.addTable(table2);
-	
 	
 		    var req = newXMLHttpRequest();
 			  var handlerFunction = getReadyStateHandler(req, 
@@ -163,47 +158,38 @@ documentstoreController.prototype.get = function (appscope,documentstoreid,name)
 				    		var dbid = item.dbid;
 				    		var syncmaster = item.syncmaster;
 
-				       
-						       mpDataForms.tables[tableid].addRow(tableid,1,8);
-						       mpDataForms.tables[tableid].setCell(tableid,1,0,name);
-						       mpDataForms.tables[tableid].setCell(tableid,1,1,appscope); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,2,docnumber); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,3,doclimit); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,4,securitytype); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,5,cluster); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,6,dbid); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,7,syncmaster); 
+						      mpDataForms.addRow('mainPanelDocumentstore',
+					                   {cells : [{type: 'text'  , text: name},
+			                                     {type: 'text'  , text: appscope},
+			                                     {type: 'text'  , text: docnumber},
+			                                     {type: 'text'  , text: doclimit},
+			                                     {type: 'text'  , text: securitytype},
+			                                     {type: 'text'  , text: cluster},
+			                                     {type: 'text'  , text: dbid},
+			                                     {type: 'text'  , text: syncmaster}]
+					                   });
+						      
 						       
 						    	  if (securitytype == 'couchdb') {
-						    		  mpDataForms.tables[table2].addHeader(table2,2,4); 
-						    		  mpDataForms.tables[table2].setCell(table2,0,0,'Admin'); 
-						    		  mpDataForms.tables[table2].setCell(table2,0,1,'Member');
-						    		  mpDataForms.tables[table2].setCell(table2,1,0,'Roles'); 
-						    		  mpDataForms.tables[table2].setCell(table2,1,1,'Users');
-						    		  mpDataForms.tables[table2].setCell(table2,1,2,'Roles'); 
-						    		  mpDataForms.tables[table2].setCell(table2,1,3,'Users');
+						    		  mpDataForms.content.tables[1].header = [{titles:['Admin','Member']},
+						    		                                  {titles: ['Roles','Users','Roles','Users']}];
 							   		  
 							   		var adminroles = "";var adminnames = "";var memberroles = "";var membernames = "";
 								 	if (securityobject.admins.hasOwnProperty("roles"))  {var adminroles = JSON.stringify(securityobject.admins.roles);}
 								   	if (securityobject.admins.hasOwnProperty("names"))  {var adminnames = JSON.stringify(securityobject.admins.names);}	
 									if (securityobject.members.hasOwnProperty("roles"))  {var memberroles = JSON.stringify(securityobject.members.roles);} 
 								    if (securityobject.members.hasOwnProperty("names"))  {var membernames = JSON.stringify(securityobject.members.names);}
-										
-									       mpDataForms.tables[table2].addRow(table2,2,4);
-									       mpDataForms.tables[table2].setCell(table2,2,0,adminroles); 
-									       mpDataForms.tables[table2].setCell(table2,2,1,adminnames); 
-									       mpDataForms.tables[table2].setCell(table2,2,2,memberroles); 
-									       mpDataForms.tables[table2].setCell(table2,2,3,membernames); 
+								      
+								    mpDataForms.addRow('mainPanelDocumentstorePermissions',
+							                   {cells : [{type: 'text'  , text: adminroles},
+					                                     {type: 'text'  , text: adminnames},
+					                                     {type: 'text'  , text: memberroles},
+					                                     {type: 'text'  , text: membernames}]
+							                   });								
 						    	  }
 						    	  
 						 	   	 if (securitytype == 'dbaas') {
-						 	   		  mpDataForms.tables[table2].addHeader(table2,1,6); 
-						 	   		  mpDataForms.tables[table2].setCell(table2,0,0,'Username'); 
-						 	   	      mpDataForms.tables[table2].setCell(table2,0,1,'Admin');
-						 	          mpDataForms.tables[table2].setCell(table2,0,2,'Replicator'); 
-						 	          mpDataForms.tables[table2].setCell(table2,0,3,'Reader');
-						 	          mpDataForms.tables[table2].setCell(table2,0,4,'Writer'); 
-						 	          mpDataForms.tables[table2].setCell(table2,0,5,'actions');
+						    		  mpDataForms.content.tables[1].header = [{titles: ['User','Admin','Replicator','Reader','Writer','actions']}];	
 
 								     var keyindex = 0;
 							         for (var key in item.securityobject) {	     
@@ -216,22 +202,17 @@ documentstoreController.prototype.get = function (appscope,documentstoreid,name)
 							           if (userpermissions[i] = "_reader") { p3 = userpermissions[i];}
 							           if (userpermissions[i] = "_writer")  { p4 = userpermissions[i];}
 							           }
-							           var rowstyle;
-							           if( (keyindex == 0) || (keyindex % 2 == 0)){ // accounting for header row
-							        	   rowstyle = 'even'; 
-							           } else { rowstyle = 'odd'; }
-							           var tableindex = parseInt(keyindex + 1);
-							           mpDataForms.tables[table2].addRow(table2,tableindex,4,rowstyle);
-							           mpDataForms.tables[table2].setCell(table2,tableindex,0,key); 
-							           mpDataForms.tables[table2].setCell(table2,tableindex,1,p1);
-							           mpDataForms.tables[table2].setCell(table2,tableindex,2,p2); 
-							           mpDataForms.tables[table2].setCell(table2,tableindex,3,p3); 
-							           mpDataForms.tables[table2].setCell(tableid,tableindex,4,p4);  
-							           keyindex++;
+									    mpDataForms.addRow('mainPanelDocumentstorePermissions',
+								                   {cells : [{type: 'text'  , text: key},
+						                                     {type: 'text'  , text: p1},
+						                                     {type: 'text'  , text: p2},
+						                                     {type: 'text'  , text: p3},
+						                                     {type: 'text'  , text: p4}]
+								                   });	
 							           }
 							         }
-							      }
-						    	  
+							      }   
+						 	   	 mpDataForms.load();
 				     }
 			  }, self.session.logout);
 			  req.onreadystatechange = handlerFunction;

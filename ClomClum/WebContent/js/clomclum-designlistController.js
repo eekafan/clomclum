@@ -11,36 +11,32 @@ designlistController.prototype.getAll = function() {
 	     var self=this;
 		 
 		 var ss = new secondsidebar(); ss.collapse();
-		 var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		 var ssMenu = new secondsidebarMenu(); ssMenu.init();
 
-
-		 var mpToolbar = new mainpanelToolbar();  mpToolbar.init();
-		 mpToolbar.setBanner('Designlists');
-		 mpToolbar.addOption('AddDesignlist','addnewdesignlist.png', 'Add Designlist');
-         mpToolbar.addOptionInput('AddDesignlist','name','name','addPrompt','Please enter name for this designlist');
-         mpToolbar.addOptionInput('AddDesignlist','list','list','addPrompt','Enter list of design docs in JSON array format');		 
-		 mpToolbar.addOptionSubmit('AddDesignlist','Create',function() {self.add()});
-		 mpToolbar.setOptionClick('AddDesignlist','addForm');
-		 mpToolbar.addOption('DesignlistHelp','help.png', 'Designlists Help');
-		 mpToolbar.setOptionHelpfile('DesignlistHelp','help/designlisthelp.html');
-		 mpToolbar.addOptionSubmit('DesignlistHelp','Finish',function() {self.bldform.dropdownDestroyAll()});
-		 mpToolbar.setOptionClick('DesignlistHelp','helpForm');  
+		 var mpToolbar = new mainpanelToolbar({
+		 banner:'Designlists',
+		 options: [{id:'AddDesignlist',icon:'addnewdesignlist.png', 
+			        clickform: {type: 'addForm', parameters: {
+			          header:'Add Designlist',
+		              submit:{label:'Create',onclick:function(){self.add();}},
+                      inputs:[{id:'name',label:'name',prompt:'Please enter name for this designlist'},
+                              {id:'list',label:'list',prompt:'Enter list of design docs in JSON array format'}]
+			        }}},
+		           {id:'DesignlistHelp',icon:'help.png', 
+                    clickform: {type: 'helpForm', parameters: {
+                        header:'Designlists Help', 
+                        submit:{label:'Finish'}, helpfile: 'help/designlisthelp.html'}}
+		            }]});	 
+		 mpToolbar.load();
 		 
-	     var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	     var tableid = 'mainPanelAllDesignlists';
-	     mpDataForms.addTable(tableid);
-	     mpDataForms.tables[tableid].addHeader(tableid,1,2);
-	     mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	     mpDataForms.tables[tableid].setCell(tableid,0,1,'List');
-
-
+	     var mpDataForms = new mainpanelDataForms({
+	    	 tables: [{id:'mainPanelAllDesignlists', header: [{titles:['Name','List']}],rows: []}]
+	    	         });
+	     
 		  var req = newXMLHttpRequest();
 		  req.onreadystatechange = getReadyStateHandler(req, 
 	         function(response) {
-			  
 			    //handle loop closure environment
-			     function get (designlistid,name) {
+			     var get = function(designlistid,name) {
 					 var thisFunction = function(){self.get(designlistid,name)};
 					 return thisFunction;
 				    } 
@@ -52,12 +48,14 @@ designlistController.prototype.getAll = function() {
 		       var name       = items[i].name;
 		       var list      = JSON.stringify(items[i].list);
 
-		       mpDataForms.tables[tableid].addRow(tableid,parseInt(i) + 1,2);
-		       mpDataForms.tables[tableid].setCellAsButton(tableid,parseInt(i) + 1,0,name,get(designlistid,name));
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,1,list); 
-
-		     }
-		    }, self.session.logout);
+		      mpDataForms.addRow('mainPanelAllDesignlists',
+		    		                   {cells : [{type: 'button', text: name, onclick: get(designlistid,name)},
+		                                         {type: 'text'  , text: list}]
+		    		                   });
+		      }
+		      mpDataForms.load();
+		    }, 
+		    self.session.logout);
 		  window.location.hash = "/_all_designlists";
 		  req.open("POST", "_all_designlists", true);
 		  req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");  
@@ -70,45 +68,48 @@ designlistController.prototype.get = function (designlistid,name) {
 	       var self=this;	
 	       
 		   var ss = new secondsidebar(); ss.expand();
-		   var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		     ssToolbar.setLeftButtonClick(function() {self.getAll()});
-		     ssToolbar.setBanner(name);
-		 
-			 ssToolbar.addAction('removeDesignlist', 'Remove');
-			 ssToolbar.setActionRemoveParameters('removeDesignlist','Remove Designlist','mainPanelDesignlist',name,
-			 'Please confirm removal of this designlist from the Registry by typing its name in the box below and clicking on confirm', 'designlist name');
-			 ssToolbar.addActionCancel('removeDesignlist','Cancel',
-					 function() {ssDropdownResultBuild ('Failure','Designlist Not Removed: Cancelled by User')});
-			 ssToolbar.addActionSubmit('removeDesignlist','Confirm',function() {self.remove(designlistid,name)});
-			 ssToolbar.setActionClick('removeDesignlist','removeForm');
 		   
-		     ssToolbar.addAction('modifyDesignlist', 'Modify');
-		     ssToolbar.setActionModifyParameters('modifyDesignlist','Modify Designlist', 'mainPanelDesignlist',designlistid, 1);
-		     ssToolbar.addActionInput('modifyDesignlist','list','list','modifyValue',null,1);
-		     ssToolbar.addActionSubmit('modifyDesignlist','Save',function() {self.modify(designlistid,name)});
-		     ssToolbar.setActionClick('modifyDesignlist','modifyForm');	     
-		     ssToolbar.setRightButtonClick(function() {self.bldform.dropdownForm(ssToolbar.rightButton)});
+		   var ssToolbar = new secondsidebarToolbar({
+			     leftbutton: {onclick:function() {self.getAll()}},
+				 banner:name,
+				 rightbutton: { id:'Toolbar',
+					            actions: [{id:'removeDesignlist', label:'Remove', 
+					            	       clickform:{type: 'removeForm', parameters : { 
+					                    	   header:'Remove Designlist',currentdata:'mainPanelDesignlist',removeobject:name, inputlabel:'designlist name',
+					                       warning:'Please confirm removal of this designlist from the Registry by typing its name in the box below and clicking on confirm',
+					                           submit:{label:'Confirm', onclick: function() {self.remove(designlistid,name);}},
+				                               cancel:{label:'Cancel',text:'Designlist Not Removed: Cancelled by User'}}}},
+				                           {id:'modifyDesignlist', label:'Modify', 
+				                            clickform:{type: 'modifyForm', parameters : { 
+							                   header:'Modify Designlist',currentdata:'mainPanelDesignlist',modifyobject:name, currentrow: 1 ,
+							                   submit:{label:'Save', onclick: function() {self.modify(designlistid,name);}},
+						                       inputs: [{id: 'list', label: 'list', type: 'modifyValue', data: null, currentindex: 1}]}}}
+					                      ]
+				 }});	  
+		   ssToolbar.load();
+		  
 		     
 		     
-		   var ssMenu = new secondsidebarMenu(); ssMenu.init();
-		     ssMenu.addOption('DesignlistEdit','Edit','hasactions');
+		   var ssMenu = new secondsidebarMenu({
+		           options: [{id:'DesignlistEdit',label: 'Edit', 
+		        	          actions: [{id:'modifyDesignlist', label:'Modify', 
+		        	        	         clickform:{type:'modifyForm', parameters : { 
+					                     header:'Modify Designlist',currentdata:'mainPanelDesignlist',modifyobject:designlistid, currentrow: 1 ,
+					                     submit:{label:'Save', onclick: function() {self.modify(designlistid,name);}},
+				                         inputs: [{id: 'list', label: 'list', type: 'modifyValue', currentindex: 1}]}}}
+			                           ]}
+		           ]});
+		   ssMenu.load();
+	
+			 var mpToolbar = new mainpanelToolbar({ banner:'' });
+			 mpToolbar.load();
 
-		     
-		     ssMenu.options['DesignlistEdit'].addAction('modifyDesignlist', 'Modify');
-		     ssMenu.options['DesignlistEdit'].setActionModifyParameters('modifyDesignlist','Modify Designlist', 'mainPanelDesignlist',name, 1);
-		     ssMenu.options['DesignlistEdit'].addActionInput('modifyDesignlist','list','list','modifyValue',null,1);	     
-		     ssMenu.options['DesignlistEdit'].addActionSubmit('modifyDesignlist','Save',function() {self.modify(designlistid,name)});	
-		     ssMenu.options['DesignlistEdit'].setActionClick('modifyDesignlist','modifyForm');
-		     ssMenu.options['DesignlistEdit'].setClick(function() {self.bldform.dropdownForm(ssMenu.options['DesignlistEdit'])});
-		
-		    var mpToolbar = new mainpanelToolbar(); mpToolbar.init();
-
-	        var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	         var tableid = 'mainPanelDesignlist';
-	         mpDataForms.addTable(tableid);
-	         mpDataForms.tables[tableid].addHeader(tableid,1,2);
-	         mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	         mpDataForms.tables[tableid].setCell(tableid,0,1,'List');
+		    var mpDataForms = new mainpanelDataForms({
+		    	 tables: [{id:'mainPanelDesignlist', 
+		    		       header: [{titles:['Name','List']}],
+		    		       rows: []}
+		    	         ]
+		    	         });
 		
 		    var req = newXMLHttpRequest();
 			  var handlerFunction = getReadyStateHandler(req, 
@@ -119,9 +120,11 @@ designlistController.prototype.get = function (designlistid,name) {
 				       var name       = item.name;
 				       var list      = JSON.stringify(item.list);
 				       
-				       mpDataForms.tables[tableid].addRow(tableid,1,2);
-				       mpDataForms.tables[tableid].setCell(tableid,1,0,name);
-				       mpDataForms.tables[tableid].setCell(tableid,1,1,list); 
+					      mpDataForms.addRow('mainPanelDesignlist',
+	    		                   {cells : [{type: 'text', text: name},
+	                                         {type: 'text', text: list}]
+	    		                   });         
+	                      mpDataForms.load();		       
 				     }
 			  }, self.session.logout);
 			  req.onreadystatechange = handlerFunction;

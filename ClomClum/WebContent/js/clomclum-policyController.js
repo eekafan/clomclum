@@ -11,40 +11,32 @@ policyController.prototype.getAll = function() {
 	     var self=this;
 		 
 		 var ss = new secondsidebar(); ss.collapse();
-		 var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		 var ssMenu = new secondsidebarMenu(); ssMenu.init();
-
-		 var mpToolbar = new mainpanelToolbar();  mpToolbar.init();
-		 mpToolbar.setBanner('Policies');
-		 mpToolbar.addOption('AddPolicy','addnewpolicy.png', 'Add Policy');
-         mpToolbar.addOptionInput('AddPolicy','name','name','addPrompt','Please enter name for this policy');
-         mpToolbar.addOptionInput('AddPolicy','application','application','addPrompt','Enter application where this policy applies');
-         mpToolbar.addOptionInput('AddPolicy','appscope','appscope','addPrompt','Enter application scope where this policy applies');
-         mpToolbar.addOptionInput('AddPolicy','templatename','templatename','addPrompt','Enter templatename to use when this policy fires');
-         mpToolbar.addOptionInput('AddPolicy','syncmaster','master for sync','addChoice',['registry', 'database']);
-         mpToolbar.addOptionInput('AddPolicy','cluster','cluster','addPrompt','Enter cluster to place docstores when policy fires');
-		 mpToolbar.addOptionSubmit('AddPolicy','Create',function() {self.add()});
-		 mpToolbar.setOptionClick('AddPolicy','addForm');
-		 mpToolbar.addOption('PolicyHelp','help.png', 'Policies Help');
-		 mpToolbar.setOptionHelpfile('PolicyHelp','help/policyhelp.html');
-		 mpToolbar.addOptionSubmit('PolicyHelp','Finish',function() {self.bldform.dropdownDestroyAll()});
-		 mpToolbar.setOptionClick('PolicyHelp','helpForm');  
+		 var mpToolbar = new mainpanelToolbar({
+			 banner:'Policies',
+			 options: [{id:'AddPolicy',icon:'addnewpolicy.png', 
+				        clickform: {type: 'addForm', parameters: {
+				          header:'Add Policy',
+			              submit:{label:'Create',onclick:function(){self.add();}},
+	                      inputs:[{id:'name',label:'id',prompt:'Please enter name for this policy'},
+	                              {id:'application',label:'application',prompt:'Enter application where this policy applies'},
+	                              {id:'appscope',label:'appscope',prompt:'Enter application scope where this policy applies'},
+	                              {id:'templatename',label:'template',prompt:'Enter template to use when this policy applies'},
+                                  {id:'syncmaster',label:'master for sync',choices:['registry', 'database']},
+                                  {id:'cluster',label:'cluster',prompt:'Enter cluster to place docstores when policy fires'}]
+				        }}},
+			           {id:'PolicyHelp',icon:'help.png', 
+	                    clickform: {type: 'helpForm', parameters: {
+	                        header:'Policies Help', 
+	                        submit:{label:'Finish'}, helpfile: 'help/policyhelp.html'}}
+			            }]});	 
+			 mpToolbar.load();
+			 
+			 var mpDataForms = new mainpanelDataForms({
+			    	 tables: [{id:'mainPanelAllPolicies', 
+			    		 header: [{titles:['Name','Requesting App','Requesting AppScope','Requesting Roles',
+			    		                   'Assign Admin Roles','Assign Member Roles','Use Template','master on Sync','Place on Cluster']}],rows: []}]
+			    	         });
 		 
-	     var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	     var tableid = 'mainPanelAllPolicies';
-	     mpDataForms.addTable(tableid);
-	     mpDataForms.tables[tableid].addHeader(tableid,1,9);
-	     mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	     mpDataForms.tables[tableid].setCell(tableid,0,1,'Requesting App');
-	     mpDataForms.tables[tableid].setCell(tableid,0,2,'Requested AppScope');
-	     mpDataForms.tables[tableid].setCell(tableid,0,3,'Requesting Roles');
-	     mpDataForms.tables[tableid].setCell(tableid,0,4,'Assign Admin Roles');
-	     mpDataForms.tables[tableid].setCell(tableid,0,5,'Assign Member Roles');
-	     mpDataForms.tables[tableid].setCell(tableid,0,6,'Use Template');
-	     mpDataForms.tables[tableid].setCell(tableid,0,7,'Master on Sync');
-	     mpDataForms.tables[tableid].setCell(tableid,0,8,'Place on Cluster');
-
-
 		  var req = newXMLHttpRequest();
 		  req.onreadystatechange = getReadyStateHandler(req, 
 	         function(response) {
@@ -70,18 +62,19 @@ policyController.prototype.getAll = function() {
 			       var syncmaster      = items[i].syncmaster;
 			       var cluster      = items[i].cluster;
 
-		       mpDataForms.tables[tableid].addRow(tableid,parseInt(i) + 1,9);
-		       mpDataForms.tables[tableid].setCellAsButton(tableid,parseInt(i) + 1,0,name,get(policyid,name));
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,1,app); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,2,appscope); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,3,requestroles); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,4,adminroles); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,5,memberroles); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,6,templatename); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,7,syncmaster); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,8,cluster); 
-
+				      mpDataForms.addRow('mainPanelAllPolicies',
+			                   {cells : [{type: 'button', text: name, onclick: get(policyid,name)},
+	                                     {type: 'text'  , text: app},
+	                                     {type: 'text'  , text: appscope},
+	                                     {type: 'text'  , text: requestroles},
+	                                     {type: 'text'  , text: adminroles},
+	                                     {type: 'text'  , text: memberroles},
+	                                     {type: 'text'  , text: templatename},
+	                                     {type: 'text'  , text: syncmaster},
+	                                     {type: 'text'  , text: cluster}]
+			                   });
 		     }
+		     mpDataForms.load();
 		    }, self.session.logout);
 		  window.location.hash = "/_all_policies";
 		  req.open("POST", "_all_policies", true);
@@ -95,69 +88,73 @@ policyController.prototype.get = function (policyid,name) {
 	       var self=this;	
 	       
 		   var ss = new secondsidebar(); ss.expand();
-		   var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		     ssToolbar.setLeftButtonClick(function() {self.getAll()});
-		     ssToolbar.setBanner(name);
-		 
-			 ssToolbar.addAction('removePolicy', 'Remove');
-			 ssToolbar.setActionRemoveParameters('removePolicy','Remove Policy','mainPanelPolicy',name,
-			 'Please confirm removal of this policy from the Registry by typing its name in the box below and clicking on confirm', 'policy name');
-			 ssToolbar.addActionCancel('removePolicy','Cancel',
-					 function() {ssDropdownResultBuild ('Failure','Policy Not Removed: Cancelled by User')});
-			 ssToolbar.addActionSubmit('removePolicy','Confirm',function() {self.remove(policyid,name)});
-			 ssToolbar.setActionClick('removePolicy','removeForm');
 		   
-		     ssToolbar.addAction('modifyPolicy', 'Modify');
-		     ssToolbar.setActionModifyParameters('modifyPolicy','Modify Policy', 'mainPanelPolicy',name, 1);
-		     ssToolbar.addActionInput('modifyPolicy','template','template name','modifyValue',null,6);
-		     ssToolbar.addActionInput('modifyPolicy','syncmaster','master for sync','modifyChoice',['registry','database'],7);
-		     ssToolbar.addActionInput('modifyPolicy','cluster','cluster','modifyValue',null,8);
-		     ssToolbar.addActionSubmit('modifyPolicy','Save',function() {self.modify(policyid,name)});
-		     ssToolbar.setActionClick('modifyPolicy','modifyForm');	     
-		     ssToolbar.addAction('modifyPolicyRoles', 'Modify Roles');
-		     ssToolbar.setActionModifyParameters('modifyPolicyRoles','Modify Policy Roles', 'mainPanelPolicy',name, 1);
-		     ssToolbar.addActionInput('modifyPolicyRoles','requestingroles','requesting roles','modifyValue',null,3);
-		     ssToolbar.addActionInput('modifyPolicyRoles','adminroles','admin roles','modifyValue',null,4);
-		     ssToolbar.addActionInput('modifyPolicyRoles','memberroles','member roles','modifyValue',null,5);
-		     ssToolbar.addActionSubmit('modifyPolicyRoles','Save',function() {self.modify_roles(policyid,name)});
-		     ssToolbar.setActionClick('modifyPolicyRoles','modifyForm');	 
-		     ssToolbar.setRightButtonClick(function() {self.bldform.dropdownForm(ssToolbar.rightButton)});
-		     
-		     
-		   var ssMenu = new secondsidebarMenu(); ssMenu.init();
-		     ssMenu.addOption('PolicyEdit','Edit','hasactions');
-	     
-		     ssMenu.options['PolicyEdit'].addAction('modifyPolicy', 'Modify');
-		     ssMenu.options['PolicyEdit'].setActionModifyParameters('modifyPolicy','Modify Policy', 'mainPanelPolicy',name, 1);
-		     ssMenu.options['PolicyEdit'].addActionInput('modifyPolicy','template','template name','modifyValue',null,6);
-		     ssMenu.options['PolicyEdit'].addActionInput('modifyPolicy','syncmaster','master for sync','modifyChoice',['registry','database'],7);
-		     ssMenu.options['PolicyEdit'].addActionInput('modifyPolicy','clusters','cluster','modifyValue',null,8);
-		     ssMenu.options['PolicyEdit'].addActionSubmit('modifyPolicy','Save',function() {self.modify(policyid,name)});	
-		     ssMenu.options['PolicyEdit'].setActionClick('modifyPolicy','modifyForm');
-		     ssMenu.options['PolicyEdit'].addAction('modifyPolicyRoles', 'Modify Roles');
-		     ssMenu.options['PolicyEdit'].setActionModifyParameters('modifyPolicyRoles','Modify Policy Roles', 'mainPanelPolicy',name, 1);
-		     ssMenu.options['PolicyEdit'].addActionInput('modifyPolicyRoles','requestingroles','requesting roles','modifyValue',null,3);
-		     ssMenu.options['PolicyEdit'].addActionInput('modifyPolicyRoles','adminroles','admin roles','modifyValue',null,4);
-		     ssMenu.options['PolicyEdit'].addActionInput('modifyPolicyRoles','memberroles','member roles','modifyValue',null,5);
-		     ssMenu.options['PolicyEdit'].addActionSubmit('modifyPolicyRoles','Save',function() {self.modify_roles(policyid,name)});
-		     ssMenu.options['PolicyEdit'].setActionClick('modifyPolicyRoles','modifyForm');	 		     
-		     ssMenu.options['PolicyEdit'].setClick(function() {self.bldform.dropdownForm(ssMenu.options['PolicyEdit'])});
+		   var ssToolbar = new secondsidebarToolbar({
+			     leftbutton: {onclick:function() {self.getAll()}},
+				 banner:name,
+				 rightbutton: { id:'Toolbar',
+					            actions: [{id:'removePolicy', label:'Remove', 
+					            	       clickform:{type: 'removeForm', parameters : { 
+					                    	   header:'Remove Policy',currentdata:'mainPanelPolicy',removeobject:name, inputlabel:'policy name',
+					                       warning:'Please confirm removal of this policy from the Registry by typing its name in the box below and clicking on confirm',
+					                           submit:{label:'Confirm', onclick: function() {self.remove(policyid,name);}},
+				                               cancel:{label:'Cancel',text:'Cluster Not Removed: Cancelled by User'}}}},
+					                      {id:'modifyPolicy', label:'Modify', 
+						                    clickform:{type: 'modifyForm', parameters : { 
+									            header:'Modify Policy',currentdata:'mainPanelPolicy',modifyobject:name, currentrow: 1,
+									            submit:{label:'Save', onclick: function() {self.modify(policyid,name);}},
+								                inputs: [{id: 'template', label: 'template', type: 'modifyValue', data: null, currentindex: 6},
+								                         {id: 'syncmaster', label: 'master for sync', type: 'modifyChoice', data: ['registry', 'database'], currentindex: 7},
+								                         {id: 'cluster', label: 'place on cluster', type: 'modifyValue', data: null, currentindex: 8}
+								                         ]}}},								                         
+				                           {id:'modifyPolicyRoles', label:'Modify Roles', 
+				                            clickform:{type: 'modifyForm', parameters : { 
+							                   header:'Modify Policy Roles',currentdata:'mainPanelPolicy',modifyobject:name, currentrow: 1,
+							                   submit:{label:'Save', onclick: function() {self.modify_roles(policyid,name);}},
+						                       inputs: [{id: 'requestingroles', label: 'requesting roles', type: 'modifyValue', data: null, currentindex: 3},
+						                                {id: 'adminroles', label: 'assign admin roles', type: 'modifyValue', data: null, currentindex: 4},
+						                                {id: 'memberroles', label: 'assign member roles', type: 'modifyValue', data: null, currentindex: 5}
+						                                ]}}}]
+				              }});	  
+		   ssToolbar.load();
+		   
+	
+		   var ssMenu = new secondsidebarMenu({
+	           options: [{id:'ClusterEdit',label: 'Edit', 
+		            actions: [{id:'removePolicy', label:'Remove', 
+	            	       clickform:{type: 'removeForm', parameters : { 
+	                    	   header:'Remove Policy',currentdata:'mainPanelPolicy',removeobject:name, inputlabel:'policy name',
+	                       warning:'Please confirm removal of this policy from the Registry by typing its name in the box below and clicking on confirm',
+	                           submit:{label:'Confirm', onclick: function() {self.remove(policyid,name);}},
+                            cancel:{label:'Cancel',text:'Cluster Not Removed: Cancelled by User'}}}},
+	                      {id:'modifyPolicy', label:'Modify', 
+		                    clickform:{type: 'modifyForm', parameters : { 
+					            header:'Modify Policy',currentdata:'mainPanelPolicy',modifyobject:name, currentrow: 1,
+					            submit:{label:'Save', onclick: function() {self.modify(policyid,name);}},
+				                inputs: [{id: 'template', label: 'template', type: 'modifyValue', data: null, currentindex: 6},
+				                         {id: 'syncmaster', label: 'master for sync', type: 'modifyChoice', data: ['registry', 'database'], currentindex: 7},
+				                         {id: 'cluster', label: 'place on cluster', type: 'modifyValue', data: null, currentindex: 8}
+				                         ]}}},								                         
+                          {id:'modifyPolicyRoles', label:'Modify Roles', 
+                            clickform:{type: 'modifyForm', parameters : { 
+			                   header:'Modify Policy Roles',currentdata:'mainPanelPolicy',modifyobject:name, currentrow: 1,
+			                   submit:{label:'Save', onclick: function() {self.modify_roles(policyid,name);}},
+		                       inputs: [{id: 'requestingroles', label: 'requesting roles', type: 'modifyValue', data: null, currentindex: 3},
+		                                {id: 'adminroles', label: 'assign admin roles', type: 'modifyValue', data: null, currentindex: 4},
+		                                {id: 'memberroles', label: 'assign member roles', type: 'modifyValue', data: null, currentindex: 5}
+		                                ]}}}]
+	                     }]});
+	       ssMenu.load();
+	       
 		
-		    var mpToolbar = new mainpanelToolbar(); mpToolbar.init();
+			var mpToolbar = new mainpanelToolbar({ banner:'' });
+			mpToolbar.load();
 
-	        var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	         var tableid = 'mainPanelPolicy';
-	         mpDataForms.addTable(tableid);
-		     mpDataForms.tables[tableid].addHeader(tableid,1,9);
-		     mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-		     mpDataForms.tables[tableid].setCell(tableid,0,1,'Requesting App');
-		     mpDataForms.tables[tableid].setCell(tableid,0,2,'Requested AppScope');
-		     mpDataForms.tables[tableid].setCell(tableid,0,3,'Requesting Roles');
-		     mpDataForms.tables[tableid].setCell(tableid,0,4,'Assign Admin Roles');
-		     mpDataForms.tables[tableid].setCell(tableid,0,5,'Assign Member Roles');
-		     mpDataForms.tables[tableid].setCell(tableid,0,6,'Use Template');
-		     mpDataForms.tables[tableid].setCell(tableid,0,7,'Master on Sync');
-		     mpDataForms.tables[tableid].setCell(tableid,0,8,'Place on Cluster');
+			 var mpDataForms = new mainpanelDataForms({
+		    	 tables: [{id:'mainPanelPolicy', 
+		    		 header: [{titles:['Name','Requesting App','Requesting AppScope','Requesting Roles',
+		    		                   'Assign Admin Roles','Assign Member Roles','Use Template','master on Sync','Place on Cluster']}],rows: []}]
+		    	         });
 		
 		    var req = newXMLHttpRequest();
 			  var handlerFunction = getReadyStateHandler(req, 
@@ -174,19 +171,21 @@ policyController.prototype.get = function (policyid,name) {
 				    	    var templatename = item.templatename;
 				    	    var syncmaster   = item.syncmaster;
 				    	    var cluster      = item.cluster;
-				       
-						       mpDataForms.tables[tableid].addRow(tableid,1,9);
-						       mpDataForms.tables[tableid].setCell(tableid,1,0,name);
-						       mpDataForms.tables[tableid].setCell(tableid,1,1,app); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,2,appscope); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,3,requestroles); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,4,adminroles); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,5,memberroles); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,6,templatename); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,7,syncmaster); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,8,cluster); 
-
+				    	    
+						      mpDataForms.addRow('mainPanelPolicy',
+					                   {cells : [{type: 'text', text: name},
+			                                     {type: 'text'  , text: app},
+			                                     {type: 'text'  , text: appscope},
+			                                     {type: 'text'  , text: requestroles},
+			                                     {type: 'text'  , text: adminroles},
+			                                     {type: 'text'  , text: memberroles},
+			                                     {type: 'text'  , text: templatename},
+			                                     {type: 'text'  , text: syncmaster},
+			                                     {type: 'text'  , text: cluster}]
+					                   });			       
+	
 				     }
+				     mpDataForms.load();
 			  }, self.session.logout);
 			  req.onreadystatechange = handlerFunction;
 			  req.open("POST", "policy", true);

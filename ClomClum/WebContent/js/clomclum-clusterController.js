@@ -11,35 +11,32 @@ clusterController.prototype.getAll = function() {
 	     var self=this;
 		 
 		 var ss = new secondsidebar(); ss.collapse();
-		 var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		 var ssMenu = new secondsidebarMenu(); ssMenu.init();
+
+		 var mpToolbar = new mainpanelToolbar({
+			 banner:'Clusters',
+			 options: [{id:'AddCluster',icon:'addnewcluster.png', 
+				        clickform: {type: 'addForm', parameters: {
+				          header:'Add Cluster',
+			              submit:{label:'Create',onclick:function(){self.add();}},
+	                      inputs:[{id:'id',label:'id',prompt:'Please enter name for this cluster'},
+	                              {id:'url',label:'url',prompt:'Please enter url for this cluster'},
+                                  {id:'clustertype',label:'clustertype',choices:['cloudant-dbaas', 'cloudant-local']},
+                                  {id:'securitytype',label:'securitytype',choices:['dbaas', 'couchdb']},
+                                  {id:'version',label:'version',prompt:'Please enter software version for this cluster'}]
+				        }}},
+			           {id:'ClusterHelp',icon:'help.png', 
+	                    clickform: {type: 'helpForm', parameters: {
+	                        header:'Clusters Help', 
+	                        submit:{label:'Finish'}, helpfile: 'help/clusterhelp.html'}}
+			            }]});	 
+			 mpToolbar.load();
 
 
-		 var mpToolbar = new mainpanelToolbar();  mpToolbar.init();
-		 mpToolbar.setBanner('Clusters');
-		 mpToolbar.addOption('AddCluster','addnewcluster.png', 'Add Cluster');
-		 mpToolbar.addOptionInput('AddCluster','id','id','addPrompt','Please enter name for this cluster');
-		 mpToolbar.addOptionInput('AddCluster','url','url','addPrompt','Please enter url for this cluster');
-		 mpToolbar.addOptionInput('AddCluster','clustertype','clustertype','addChoice',['cloudant-dbaas', 'cloudant-local']);
-		 mpToolbar.addOptionInput('AddCluster','securitytype','securitytype','addChoice',['dbaas', 'couchdb']);
-		 mpToolbar.addOptionInput('AddCluster','version','version','addPrompt','Please enter software version for this cluster');
-		 mpToolbar.addOptionSubmit('AddCluster','Create',function() {self.add()});
-		 mpToolbar.setOptionClick('AddCluster','addForm');
-		 mpToolbar.addOption('ClusterHelp','help.png', 'Clusters Help');
-		 mpToolbar.setOptionHelpfile('ClusterHelp','help/clusterhelp.html');
-		 mpToolbar.addOptionSubmit('ClusterHelp','Finish',function() {self.bldform.dropdownDestroyAll()});
-		 mpToolbar.setOptionClick('ClusterHelp','helpForm');  
+		  var mpDataForms = new mainpanelDataForms({
+		    	 tables: [{id:'mainPanelAllClusters', 
+		    		 header: [{titles:['Name','url','Type','Security','Version']}],rows: []}]
+		    	         });
 		 
-	     var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	     var tableid = 'mainPanelAllClusters';
-	     mpDataForms.addTable(tableid);
-	     mpDataForms.tables[tableid].addHeader(tableid,1,5);
-	     mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	     mpDataForms.tables[tableid].setCell(tableid,0,1,'url');
-	     mpDataForms.tables[tableid].setCell(tableid,0,2,'Type');
-	     mpDataForms.tables[tableid].setCell(tableid,0,3,'Security');
-	     mpDataForms.tables[tableid].setCell(tableid,0,4,'Version');
-
 		  var req = newXMLHttpRequest();
 		  req.onreadystatechange = getReadyStateHandler(req, 
 	         function(response) {
@@ -58,14 +55,16 @@ clusterController.prototype.getAll = function() {
 		       var type      = items[i].clustertype;
 		       var security  = items[i].securitytype;
 		       var version   = items[i].version;
-
-		       mpDataForms.tables[tableid].addRow(tableid,parseInt(i) + 1,5);
-		       mpDataForms.tables[tableid].setCellAsButton(tableid,parseInt(i) + 1,0,clusterid,get(clusterid));
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,1,url); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,2,type);
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,3,security); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,4,version); 
-		     }
+		       
+			      mpDataForms.addRow('mainPanelAllClusters',
+		                   {cells : [{type: 'button', text: clusterid, onclick: get(clusterid)},
+                                     {type: 'text'  , text: url},
+                                     {type: 'text'  , text: type},
+                                     {type: 'text'  , text: security},
+                                     {type: 'text'  , text: version}]
+		                   });
+                  }
+                  mpDataForms.load();
 		    }, self.session.logout);
 		  window.location.hash = "/_all_clusters";
 		  req.open("POST", "_all_clusters", true);
@@ -79,64 +78,57 @@ clusterController.prototype.get = function (clusterid) {
 	       var self=this;	
 	       
 		   var ss = new secondsidebar(); ss.expand();
-		   var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		     ssToolbar.setLeftButtonClick(function() {self.getAll()});
-		     ssToolbar.setBanner(clusterid);
-		 
-			 ssToolbar.addAction('removeCluster', 'Remove');
-			 ssToolbar.setActionRemoveParameters('removeCluster','Remove Cluster','mainPanelCluster',clusterid,
-			 'Please confirm removal of this cluster from the Registry by typing its name in the box below and clicking on confirm', 'cluster name');
-			 ssToolbar.addActionCancel('removeCluster','Cancel',
-					 function() {ssDropdownResultBuild ('Failure','Cluster Not Removed: Cancelled by User')});
-			 ssToolbar.addActionSubmit('removeCluster','Confirm',function() {self.remove(clusterid)});
-			 ssToolbar.setActionClick('removeCluster','removeForm');
 		   
-		     ssToolbar.addAction('modifyCluster', 'Modify');
-		     ssToolbar.setActionModifyParameters('modifyCluster','Modify Cluster', 'mainPanelCluster',clusterid, 1);
-		     ssToolbar.addActionSubmit('modifyCluster','Save',function() {self.modify(clusterid)});
-		     ssToolbar.addActionInput('modifyCluster','url','url','modifyValue',null,1);
-		     ssToolbar.addActionInput('modifyCluster','clustertype','clustertype','modifyChoice',['cloudant-dbaas', 'cloudant-local'],2);
-		     ssToolbar.addActionInput('modifyCluster','securitytype','securitytype','modifyChoice',['dbaas', 'couchdb'],3);
-		     ssToolbar.addActionInput('modifyCluster','version','software version','modifyValue',null,4);
-		     ssToolbar.setActionClick('modifyCluster','modifyForm');	     
-		     ssToolbar.setRightButtonClick(function() {self.bldform.dropdownForm(ssToolbar.rightButton)});
+		   var ssToolbar = new secondsidebarToolbar({
+			     leftbutton: {onclick:function() {self.getAll()}},
+				 banner:clusterid,
+				 rightbutton: { id:'Toolbar',
+					            actions: [{id:'removeCluster', label:'Remove', 
+					            	       clickform:{type: 'removeForm', parameters : { 
+					                    	   header:'Remove Cluster',currentdata:'mainPanelCluster',removeobject:clusterid, inputlabel:'cluster name',
+					                       warning:'Please confirm removal of this cluster from the Registry by typing its name in the box below and clicking on confirm',
+					                           submit:{label:'Confirm', onclick: function() {self.remove(clusterid);}},
+				                               cancel:{label:'Cancel',text:'Cluster Not Removed: Cancelled by User'}}}},
+				                           {id:'modifyCluster', label:'Modify', 
+				                            clickform:{type: 'modifyForm', parameters : { 
+							                   header:'Modify Cluster',currentdata:'mainPanelCluster',modifyobject:clusterid, currentrow: 1,
+							                   submit:{label:'Save', onclick: function() {self.modify(clusterid);}},
+						                       inputs: [{id: 'url', label: 'url', type: 'modifyValue', data: null, currentindex: 1},
+						                                {id: 'clustertype', label: 'url', type: 'modifyChoice', data: ['cloudant-dbaas', 'cloudant-local'], currentindex: 2},
+						                                {id: 'securitytype', label: 'securitytype', type: 'modifyChoice', data: ['dbaas', 'couchdb'], currentindex: 3},
+						                                {id: 'version', label: 'software version', type: 'modifyValue', data: null, currentindex: 4}
+						                                ]}}}]
+				 }});	  
+		   ssToolbar.load();
 		     
+		   var ssMenu = new secondsidebarMenu({
+	           options: [{id:'ClusterEdit',label: 'Edit', 
+	        	          actions: [{id:'modifyCluster', label:'Modify', 
+	                            clickform:{type: 'modifyForm', parameters : { 
+					                   header:'Modify Cluster',currentdata:'mainPanelCluster',modifyobject:clusterid, currentrow: 1,
+					                   submit:{label:'Save', onclick: function() {self.modify(clusterid);}},
+				                       inputs: [{id: 'url', label: 'url', type: 'modifyValue', data: null, currentindex: 1},
+				                                {id: 'clustertype', label: 'url', type: 'modifyChoice', data: ['cloudant-dbaas', 'cloudant-local'], currentindex: 2},
+				                                {id: 'securitytype', label: 'securitytype', type: 'modifyChoice', data: ['dbaas', 'couchdb'], currentindex: 3},
+				                                {id: 'version', label: 'software version', type: 'modifyValue', data: null, currentindex: 4}
+				                                ]}}}]},
+				          {id:'ClusterSyncSecurity', label: 'Sync Security', onclick: function() {self.syncSecurity(clusterid)}},
+				          {id:'ClusterSyncDesign', label: 'Sync Design', onclick: function() {self.syncDesign(clusterid)}},
+				          {id:'ClusterManaged', label: 'Managed Document Stores', onclick: function() {self.getDocumentstores(clusterid,'managed')}},
+				          {id:'ClusterUnmanaged', label: 'Unmanaged Document Stores', onclick: function() {self.getDocumentstores(clusterid,'unmanaged')}},
+				          {id:'ClusterSettings', label: 'Settings', onclick: function() {self.get(clusterid)}},
+	                     ]});
+	       ssMenu.load();
 		     
-		   var ssMenu = new secondsidebarMenu(); ssMenu.init();
-		     ssMenu.addOption('ClusterEdit','Edit','hasactions');
-		     ssMenu.addOption('ClusterSyncSecurity','Sync Security','noactions');
-		     ssMenu.addOption('ClusterSyncDesign','Sync Design','noactions');
-		     ssMenu.addOption('ClusterManaged','Managed Document Stores','noactions');
-		     ssMenu.addOption('ClusterUnmanaged','Unmanaged Document Stores','noactions');
-		     ssMenu.addOption('ClusterSettings','Settings','noactions');
-		     
-		     ssMenu.options['ClusterEdit'].addAction('modifyCluster', 'Modify');
-		     ssMenu.options['ClusterEdit'].setActionModifyParameters('modifyCluster','Modify Cluster', 'mainPanelCluster',clusterid, 1);
-		     ssMenu.options['ClusterEdit'].addActionSubmit('modifyCluster','Save',function() {self.modify(clusterid)});
-		     ssMenu.options['ClusterEdit'].addActionInput('modifyCluster','url','url','modifyValue',null,1);
-		     ssMenu.options['ClusterEdit'].addActionInput('modifyCluster','clustertype','clustertype','modifyChoice',['cloudant-dbaas', 'cloudant-local'],2);
-		     ssMenu.options['ClusterEdit'].addActionInput('modifyCluster','securitytype','securitytype','modifyChoice',['dbaas', 'couchdb'],3);
-		     ssMenu.options['ClusterEdit'].addActionInput('modifyCluster','version','software version','modifyValue',null,4);
-		     ssMenu.options['ClusterEdit'].setActionClick('modifyCluster','modifyForm');
-		     ssMenu.options['ClusterEdit'].setClick(function() {self.bldform.dropdownForm(ssMenu.options['ClusterEdit'])});
-		     ssMenu.options['ClusterSyncSecurity'].setClick(function() {self.syncSecurity(clusterid)});
-		     ssMenu.options['ClusterSyncDesign'].setClick(function() {self.syncDesign(clusterid)});
-		     ssMenu.options['ClusterManaged'].setClick(function() {self.getDocumentstores(clusterid,'managed')});
-		     ssMenu.options['ClusterUnmanaged'].setClick(function() {self.getDocumentstores(clusterid,'unmanaged')});
-		     ssMenu.options['ClusterSettings'].setClick(function() {self.get(clusterid)});	 
+			var mpToolbar = new mainpanelToolbar({ banner:'' });
+			mpToolbar.load();
 		
-		    var mpToolbar = new mainpanelToolbar(); mpToolbar.init();
-
-	        var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	         var tableid = 'mainPanelCluster';
-	         mpDataForms.addTable(tableid);
-	         mpDataForms.tables[tableid].addHeader(tableid,1,5);
-	         mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	         mpDataForms.tables[tableid].setCell(tableid,0,1,'url');
-	         mpDataForms.tables[tableid].setCell(tableid,0,2,'Type');
-	         mpDataForms.tables[tableid].setCell(tableid,0,3,'Security');
-	         mpDataForms.tables[tableid].setCell(tableid,0,4,'Version');
-		
+			var mpDataForms = new mainpanelDataForms({
+			    	 tables: [{id:'mainPanelCluster', 
+			    		 header: [{titles:['Name','url','Type','Security','Version']}],rows: []}]
+			    	         });
+			  
+			  
 		    var req = newXMLHttpRequest();
 			  var handlerFunction = getReadyStateHandler(req, 
 	              function(response) {
@@ -148,14 +140,15 @@ clusterController.prototype.get = function (clusterid) {
 				       var security  = item.securitytype;
 				       var version   = item.version;
 				       
-				       mpDataForms.tables[tableid].addRow(tableid,1,5);
-				       mpDataForms.tables[tableid].setCellAsButton(tableid,1,0,clusterid,
-				    		   function(){self.getDocumentstores(clusterid,'managed')});
-				       mpDataForms.tables[tableid].setCell(tableid,1,1,url); 
-				       mpDataForms.tables[tableid].setCell(tableid,1,2,type);
-				       mpDataForms.tables[tableid].setCell(tableid,1,3,security); 
-				       mpDataForms.tables[tableid].setCell(tableid,1,4,version); 
+					      mpDataForms.addRow('mainPanelCluster',
+				                   {cells : [{type: 'button', text: clusterid, onclick: function(){self.getDocumentstores(clusterid,'managed')}},
+		                                     {type: 'text'  , text: url},
+		                                     {type: 'text'  , text: type},
+		                                     {type: 'text'  , text: security},
+		                                     {type: 'text'  , text: version}]
+				                   });
 				     }
+				     mpDataForms.load();		  
 			  }, self.session.logout);
 			  req.onreadystatechange = handlerFunction;
 			  req.open("POST", "cluster", true);
@@ -241,18 +234,20 @@ clusterController.prototype.getDocumentstores = function (clusterid,managedstatu
 			 
 			      var items = JSON.parse(response);		
 					for (var i in items) { // response is a list of documentstores
-					       var tableindex = parseInt(i) + 1;
-					       mpDataForms.tables[tableid].addRow(tableid,tableindex,2);
 						if (items[i]._id != undefined) {
 					       var documentstoreid   = items[i]._id;
 					       var appscope = items[i].scopetype;
 					       var dbid     = items[i].dbid;
 					       var name     = items[i].name;
 					       var cluster  = items[i].cluster;
-					       mpDataForms.tables[tableid].setCellAsButton(tableid,tableindex,0,name,getDocumentstore(appscope,documentstoreid,name));				    		  
-					       mpDataForms.tables[tableid].setCell(tableid,tableindex,1,dbid);
+					       
+						      mpDataForms.addRow('mainPanelClusterDocuments',
+					                   {cells : [{type: 'button', text: name, onclick: getDocumentstore(appscope,documentstoreid,name)},
+			                                     {type: 'text'  , text: dbid}]
+					                   });
 					   }
 					}
+					mpDataForms.load();
 		 }
 
 		 function handleResponse_cluster_documentstores_unmanaged(response) {
@@ -269,56 +264,66 @@ clusterController.prototype.getDocumentstores = function (clusterid,managedstatu
 			
 			      var items = JSON.parse(response)		
 					for (var i in items) { // response is a list of documentstores
-					       var tableindex = parseInt(i) + 1;
-					       mpDataForms.tables[tableid].addRow(tableid,tableindex,3);
+	
 							if (items[i]._id != undefined) { // entry already exists in registry but store is unmanaged
 								  var documentstoreid   = items[i]._id;
 								   var appscope = items[i].scopetype;
 							       var dbid     = items[i].dbid;
 							       var name     = items[i].name;
 							       var cluster  = items[i].cluster;
-							       mpDataForms.tables[tableid].setCellAsButton(tableid,tableindex,0,name,getDocumentstore(appscope,documentstoreid,name));				    		  
-							       mpDataForms.tables[tableid].setCell(tableid,tableindex,1,dbid);
+								      mpDataForms.addRow('mainPanelClusterDocuments',
+							                   {cells : [{type: 'button', text: name, onclick: getDocumentstore(appscope,documentstoreid,name)},
+					                                     {type: 'text'  , text: dbid}]
+							                   });
 							        if (dbid.charAt(0) != '_') {
 							        }
 							 } else { // no entry in registry so add a new one
-								    mpDataForms.tables[tableid].setCell(tableid,tableindex,1,items[i].dbid);			  
+								    var dbid = items[i].dbid;	  
 							        if (items[i].dbid.charAt(0) != '_') {
-							        	mpDataForms.tables[tableid].setCellAsAction(tableid,tableindex,2,'Manage','Manage Documentstore');
-							        	clusterchoices = new Array(0); clusterchoices.push(clusterid);
-							        	mpDataForms.tables[tableid].addCellActionInput(tableid,tableindex,2,'cluster','cluster','addChoice',clusterchoices);
-							        	dbchoices = new Array(0); dbchoices.push(items[i].dbid);
-							        	mpDataForms.tables[tableid].addCellActionInput(tableid,tableindex,2,'db','db','addChoice',dbchoices);
-							        	mpDataForms.tables[tableid].addCellActionInput(tableid,tableindex,2,'name','name','addPrompt','Please enter name for this documentstore');		
-							        	mpDataForms.tables[tableid].addCellActionInput(tableid,tableindex,2,'appscope','appscope','addChoice',['Personal', 'Team', 'Enterprise']);
-							        	mpDataForms.tables[tableid].addCellActionInput(tableid,tableindex,2,'adminroles','admin roles','addPrompt','Please enter admin roles in format \[\"role1\",\"role2\",...\]');
-							        	mpDataForms.tables[tableid].addCellActionInput(tableid,tableindex,2,'memberroles','member roles','addPrompt','Please enter member roles in format \[\"role1\",\"role2\",...\]');
-							        	mpDataForms.tables[tableid].addCellActionSubmit(tableid,tableindex,2,'Save',manageDocumentstore(clusterid,items[i].dbid));
-							        	mpDataForms.tables[tableid].setCellActionClick(tableid,tableindex,2,'addForm');
+							        	  var clusterchoices = new Array(0); clusterchoices.push(clusterid);
+							        	  var dbchoices = new Array(0); dbchoices.push(dbid);
+									      mpDataForms.addRow('mainPanelClusterDocuments',
+								                   {cells : [{type: 'text', text: ''},
+						                                     {type: 'text', text: dbid},
+						                                     {type: 'action', 
+						                                		 action: {id:'ManageDocumentstore', label:'Manage',
+						                     				        clickform: {type: 'addForm', parameters: {
+						                     				          header:'Manage Documentstore',
+						                     			              submit:{label:'Save',onclick:manageDocumentstore(clusterid,dbid)},
+						                     	                      inputs:[{id:'cluster',label:'cluster',choices:clusterchoices},
+						                     	                              {id:'db',label:'db',choices:dbchoices},
+						                                                       {id:'appscope',label:'scope',choices:['Personal', 'Team', 'Enterprise']},
+						                                                       {id:'adminroles',label:'admin roles',prompt:'Please enter admin roles in format \[\"role1\",\"role2\",...\]'},
+						                                                       {id:'memberroles',label:'member roles',prompt:'Please enter member roles in format \[\"role1\",\"role2\",...\]'}   				         
+						                                                      ]}}}}
+						                            ]});
 								    }
 							  }
 		          }
+			      mpDataForms.load();
 		 }
 		
 		var responseFunction;
-		var mpToolbar = new mainpanelToolbar(); mpToolbar.init();
-		var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-		var tableid = 'mainPanelClusterDocuments';
-		mpDataForms.addTable(tableid);
+        var mpToolbar;
+	
+		var mpDataForms; 
 
-	    if (managedstatus == 'managed') {
-		        mpToolbar.setBanner('Managed Document Stores');
-		        mpDataForms.tables[tableid].addHeader(tableid,1,2);
-		        mpDataForms.tables[tableid].setCell(tableid,0,0,'Name'); 
-		        mpDataForms.tables[tableid].setCell(tableid,0,1,'Id'); 
+	    if (managedstatus == 'managed') {		
+	    	    mpToolbar = new mainpanelToolbar({ banner:'Managed Document Stores' });
+		        mpToolbar.load();
+		        mpDataForms= new mainpanelDataForms({
+			    	 tables: [{id:'mainPanelClusterDocuments', 
+			    		 header: [{titles:['Name','Id']}],rows: []}]
+			    	         });
 			    responseFunction = handleResponse_cluster_documentstores_managed;
 	    } 
 	    if (managedstatus == 'unmanaged') {
-	    	    mpToolbar.setBanner('Unmanaged Document Stores')
-	  	        mpDataForms.tables[tableid].addHeader(tableid,1,3);
-	    	    mpDataForms.tables[tableid].setCell(tableid,0,0,'Name'); 
-	    	    mpDataForms.tables[tableid].setCell(tableid,0,1,'Id'); 
-	    	    mpDataForms.tables[tableid].setCell(tableid,0,2,'Actions'); 
+    	    mpToolbar = new mainpanelToolbar({ banner:'Managed Document Stores' });
+	        mpToolbar.load();
+	        mpDataForms= new mainpanelDataForms({
+		    	 tables: [{id:'mainPanelClusterDocuments', 
+		    		 header: [{titles:['Name','Id','Actions']}],rows: []}]
+		    	         });
 		        responseFunction = handleResponse_cluster_documentstores_unmanaged;
 		  }
 		  

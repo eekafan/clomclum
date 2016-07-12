@@ -11,36 +11,32 @@ templateController.prototype.getAll = function() {
 	     var self=this;
 		 
 		 var ss = new secondsidebar(); ss.collapse();
-		 var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		 var ssMenu = new secondsidebarMenu(); ssMenu.init();
+		 var mpToolbar = new mainpanelToolbar({
+			 banner:'Templates',
+			 options: [{id:'AddTemplate',icon:'addnewpolicy.png', 
+				        clickform: {type: 'addForm', parameters: {
+				          header:'Add Template',
+			              submit:{label:'Create',onclick:function(){self.add();}},
+	                      inputs:[{id:'name',label:'id',prompt:'Please enter name for this template'},
+	                              {id:'numcopies',label:'application',choices:['3','4','5','6']},
+	                              {id:'quorum',label:'quorum',choices:['8','2','3','4','5','6','7','9','10']},
+	                              {id:'read',label:'read',choices:['2','3','4','5','6']},
+	                              {id:'write',label:'write',choices:['2','3','4','5','6']},
+	                              {id:'read',label:'appscope',prompt:'Enter application scope where this policy applies'},
+	                              {id:'defaultdesigndocs',label:'default designlist',prompt:'Enter designlist name to use with this template'}]
+				        }}},
+			           {id:'TemplateHelp',icon:'help.png', 
+	                    clickform: {type: 'helpForm', parameters: {
+	                        header:'Policies Help', 
+	                        submit:{label:'Finish'}, helpfile: 'help/templatehelp.html'}}
+			            }]});	 
+			 mpToolbar.load();
 
-		 var mpToolbar = new mainpanelToolbar();  mpToolbar.init();
-		 mpToolbar.setBanner('Templates');
-		 mpToolbar.addOption('AddTemplate','addnewtemplate.png', 'Add Template');
-         mpToolbar.addOptionInput('AddTemplate','name','name','addPrompt','Please enter name for this template');
-    	 mpToolbar.addOptionInput('AddTemplate','numcopies','numcopies','addChoice',['3','4','5','6']);	
-    	 mpToolbar.addOptionInput('AddTemplate','quorum','quorum','addChoice',['8','2','3','4','5','6','7','9','10']);
-    	 mpToolbar.addOptionInput('AddTemplate','read','read','addChoice',['2','3','4','5']);	
-     	 mpToolbar.addOptionInput('AddTemplate','write','write','addChoice',['2','3','4','5']);
-         mpToolbar.addOptionInput('AddTemplate','defaultdesigndocs','default designlist','addPrompt','Please enter design list name that applies with this template');
-		 mpToolbar.addOptionSubmit('AddTemplate','Create',function() {self.add()});
-		 mpToolbar.setOptionClick('AddTemplate','addForm');
-		 mpToolbar.addOption('TemplateHelp','help.png', 'Templates Help');
-		 mpToolbar.setOptionHelpfile('TemplateHelp','help/templatehelp.html');
-		 mpToolbar.addOptionSubmit('TemplateHelp','Finish',function() {self.bldform.dropdownDestroyAll()});
-		 mpToolbar.setOptionClick('TemplateHelp','helpForm');  
+			 var mpDataForms = new mainpanelDataForms({
+		    	 tables: [{id:'mainPanelAllTemplates', 
+		    		 header: [{titles:['Name','N','Q','R','W', 'Design List']}],rows: []}]
+		    	         });
 		 
-	     var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	     var tableid = 'mainPanelAllTemplates';
-	     mpDataForms.addTable(tableid);
-	     mpDataForms.tables[tableid].addHeader(tableid,1,6);
-	     mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	     mpDataForms.tables[tableid].setCell(tableid,0,1,'N');
-	     mpDataForms.tables[tableid].setCell(tableid,0,2,'Q');
-	     mpDataForms.tables[tableid].setCell(tableid,0,3,'R');
-	     mpDataForms.tables[tableid].setCell(tableid,0,4,'W');
-	     mpDataForms.tables[tableid].setCell(tableid,0,5,'Design List');
-
 
 		  var req = newXMLHttpRequest();
 		  req.onreadystatechange = getReadyStateHandler(req, 
@@ -62,16 +58,17 @@ templateController.prototype.getAll = function() {
 		    	       var read      = items[i].read;
 		    	       var write     = items[i].write;
 		    	       var list      = items[i].designlist;
-
-		       mpDataForms.tables[tableid].addRow(tableid,parseInt(i) + 1,6);
-		       mpDataForms.tables[tableid].setCellAsButton(tableid,parseInt(i) + 1,0,name,get(templateid,name));
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,1,numcopies); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,2,quorum); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,3,read); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,4,write); 
-		       mpDataForms.tables[tableid].setCell(tableid,parseInt(i) + 1,5,list); 
-
+		    	       
+		    		      mpDataForms.addRow('mainPanelAllTemplates',
+				                   {cells : [{type: 'button', text: name, onclick: get(templateid,name)},
+		                                     {type: 'text'  , text: numcopies},
+		                                     {type: 'text'  , text: quorum},
+		                                     {type: 'text'  , text: read},
+		                                     {type: 'text'  , text: write},
+		                                     {type: 'text'  , text: list}]
+				                   });
 		     }
+		     mpDataForms.load();
 		    }, self.session.logout);
 		  window.location.hash = "/_all_templates";
 		  req.open("POST", "_all_templates", true);
@@ -85,56 +82,55 @@ templateController.prototype.get = function (templateid,name) {
 	       var self=this;	
 	       
 		   var ss = new secondsidebar(); ss.expand();
-		   var ssToolbar = new secondsidebarToolbar(); ssToolbar.init();
-		     ssToolbar.setLeftButtonClick(function() {self.getAll()});
-		     ssToolbar.setBanner(name);
-		 
-			 ssToolbar.addAction('removeTemplate', 'Remove');
-			 ssToolbar.setActionRemoveParameters('removeTemplate','Remove Template','mainPanelTemplate',name,
-			 'Please confirm removal of this template from the Registry by typing its name in the box below and clicking on confirm', 'template name');
-			 ssToolbar.addActionCancel('removeTemplate','Cancel',
-					 function() {ssDropdownResultBuild ('Failure','Template Not Removed: Cancelled by User')});
-			 ssToolbar.addActionSubmit('removeTemplate','Confirm',function() {self.remove(templateid,name)});
-			 ssToolbar.setActionClick('removeTemplate','removeForm');
 		   
-		     ssToolbar.addAction('modifyTemplate', 'Modify');
-		     ssToolbar.setActionModifyParameters('modifyTemplate','Modify Template', 'mainPanelTemplate',name, 1);
-		     ssToolbar.addActionInput('modifyTemplate','numcopies','numcopies','modifyChoice',['3','4','5','6'],1);
-		     ssToolbar.addActionInput('modifyTemplate','quorum','quorum','modifyChoice',['8','2','3','4','5','6','7','9','10'],2);
-		     ssToolbar.addActionInput('modifyTemplate','read','read','modifyChoice',['2','3','4','5'],3);
-		     ssToolbar.addActionInput('modifyTemplate','write','write','modifyChoice',['2','3','4','5'],4);
-		     ssToolbar.addActionInput('modifyTemplate','defaultdesigndocs','default designlist','modifyValue',null,5);
-		     ssToolbar.addActionSubmit('modifyTemplate','Save',function() {self.modify(templateid,name)});
-		     ssToolbar.setActionClick('modifyTemplate','modifyForm');	     
-		     ssToolbar.setRightButtonClick(function() {self.bldform.dropdownForm(ssToolbar.rightButton)});
-		     
-		     
-		   var ssMenu = new secondsidebarMenu(); ssMenu.init();
-		     ssMenu.addOption('TemplateEdit','Edit','hasactions');
-	     
-		     ssMenu.options['TemplateEdit'].addAction('modifyTemplate', 'Modify');
-		     ssMenu.options['TemplateEdit'].setActionModifyParameters('modifyTemplate','Modify Template', 'mainPanelTemplate',name, 1);
-		     ssMenu.options['TemplateEdit'].addActionInput('modifyTemplate','numcopies','numcopies','modifyChoice',['3','4','5','6'],1);
-		     ssMenu.options['TemplateEdit'].addActionInput('modifyTemplate','quorum','quorum','modifyChoice',['8','2','3','4','5','6','7','9','10'],2);
-		     ssMenu.options['TemplateEdit'].addActionInput('modifyTemplate','read','read','modifyChoice',['2','3','4','5'],3);
-		     ssMenu.options['TemplateEdit'].addActionInput('modifyTemplate','write','write','modifyChoice',['2','3','4','5'],4);
-		     ssMenu.options['TemplateEdit'].addActionInput('modifyTemplate','defaultdesigndocs','default designlist','modifyValue',null,5);
-		     ssMenu.options['TemplateEdit'].addActionSubmit('modifyTemplate','Save',function() {self.modify(templateid,name)});	
-		     ssMenu.options['TemplateEdit'].setActionClick('modifyTemplate','modifyForm');
-		     ssMenu.options['TemplateEdit'].setClick(function() {self.bldform.dropdownForm(ssMenu.options['TemplateEdit'])});
+		   var ssToolbar = new secondsidebarToolbar({
+			     leftbutton: {onclick:function() {self.getAll()}},
+				 banner:name,
+				 rightbutton: { id:'Toolbar',
+					            actions: [{id:'removeTemplate', label:'Remove', 
+					            	       clickform:{type: 'removeForm', parameters : { 
+					                    	   header:'Remove Template',currentdata:'mainPanelTemplate',removeobject:name, inputlabel:'template name',
+					                       warning:'Please confirm removal of this template from the Registry by typing its name in the box below and clicking on confirm',
+					                           submit:{label:'Confirm', onclick: function() {self.remove(templateid,name);}},
+				                               cancel:{label:'Cancel',text:'Cluster Not Removed: Cancelled by User'}}}},
+					                      {id:'modifyTemplate', label:'Modify', 
+						                    clickform:{type: 'modifyForm', parameters : { 
+									            header:'Modify Template',currentdata:'mainPanelTemplate',modifyobject:name, currentrow: 1,
+									            submit:{label:'Save', onclick: function() {self.modify(templateid,name);}},
+								                inputs: [{id: 'numcopies', label: 'numcopies', type: 'modifyChoice', data: ['3','4','5','6'], currentindex: 1},
+								                         {id: 'quorum', label: 'quorum', type: 'modifyChoice', data: ['8','2','3','4','5','6','7','9','10'], currentindex: 2},
+								                         {id: 'read', label: 'read', type: 'modifyChoice', data: ['2','3','4','5','6'], currentindex: 3},
+								                         {id: 'write', label: 'write', type: 'modifyChoice', data: ['2','3','4','5','6'], currentindex: 4},
+								                         {id: 'defaultdesigndocs', label: 'default designlist', type: 'modifyValue', data: null, currentindex: 5}
+								                         ]}}}]							                         
+				              }});	  
+		   ssToolbar.load();
+		   
+		   var ssMenu = new secondsidebarMenu({
+	           options: [{id:'TemplateEdit',label: 'Edit', 
+		            actions: [
+	                      {id:'modifyTemplate', label:'Modify', 
+		                    clickform:{type: 'modifyForm', parameters : { 
+					            header:'Modify Template',currentdata:'mainPanelTemplate',modifyobject:name, currentrow: 1,
+					            submit:{label:'Save', onclick: function() {self.modify(templateid,name);}},
+				                inputs: [{id: 'numcopies', label: 'numcopies', type: 'modifyChoice', data: ['3','4','5','6'], currentindex: 1},
+				                         {id: 'quorum', label: 'quorum', type: 'modifyChoice', data: ['8','2','3','4','5','6','7','9','10'], currentindex: 2},
+				                         {id: 'read', label: 'read', type: 'modifyChoice', data: ['2','3','4','5','6'], currentindex: 3},
+				                         {id: 'write', label: 'write', type: 'modifyChoice', data: ['2','3','4','5','6'], currentindex: 4},
+				                         {id: 'defaultdesigndocs', label: 'default designlist', type: 'modifyValue', data: null, currentindex: 5}
+				                         ]}}}]							                         
+	                     }]});
+	       ssMenu.load();
+	       
 		
-		    var mpToolbar = new mainpanelToolbar(); mpToolbar.init();
+			var mpToolbar = new mainpanelToolbar({ banner:'' });
+			mpToolbar.load();
 
-	        var mpDataForms = new mainpanelDataForms(); mpDataForms.init();
-	         var tableid = 'mainPanelTemplate';
-	         mpDataForms.addTable(tableid);
-	         mpDataForms.tables[tableid].addHeader(tableid,1,6);
-	         mpDataForms.tables[tableid].setCell(tableid,0,0,'Name');
-	         mpDataForms.tables[tableid].setCell(tableid,0,1,'N');
-	         mpDataForms.tables[tableid].setCell(tableid,0,2,'Q');
-	         mpDataForms.tables[tableid].setCell(tableid,0,3,'R');
-	         mpDataForms.tables[tableid].setCell(tableid,0,4,'W');
-	         mpDataForms.tables[tableid].setCell(tableid,0,5,'Design List');
+			 var mpDataForms = new mainpanelDataForms({
+		    	 tables: [{id:'mainPanelTemplate', 
+		    		 header: [{titles:['Name','N','Q','R','W', 'Design List']}],rows: []}]
+		    	         });
+
 		
 		    var req = newXMLHttpRequest();
 			  var handlerFunction = getReadyStateHandler(req, 
@@ -149,14 +145,16 @@ templateController.prototype.get = function (templateid,name) {
 				    	    var write     = item.write;
 				    	    var list      = item.designlist;
 				       
-						       mpDataForms.tables[tableid].addRow(tableid,1,6);
-						       mpDataForms.tables[tableid].setCell(tableid,1,0,name);
-						       mpDataForms.tables[tableid].setCell(tableid,1,1,numcopies); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,2,quorum); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,3,read); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,4,write); 
-						       mpDataForms.tables[tableid].setCell(tableid,1,5,list); 
-				     }
+			    		      mpDataForms.addRow('mainPanelTemplate',
+					                   {cells : [{type: 'button', text: name},
+			                                     {type: 'text'  , text: numcopies},
+			                                     {type: 'text'  , text: quorum},
+			                                     {type: 'text'  , text: read},
+			                                     {type: 'text'  , text: write},
+			                                     {type: 'text'  , text: list}]
+					                   });
+			     }
+			     mpDataForms.load();
 			  }, self.session.logout);
 			  req.onreadystatechange = handlerFunction;
 			  req.open("POST", "template", true);

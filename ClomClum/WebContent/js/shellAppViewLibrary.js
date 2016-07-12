@@ -89,99 +89,29 @@ function secondsidebar() {
 }
 
 
-function secondsidebarOption (OptionId,location,type) {
-	
-	this.id = OptionId;
-	this.location = location;
-	this.type = type;
-	if (this.type == 'hasactions') {
-	  this.actions = new Array(0);
-	}
 
-	this.setClick = function (clickfunction) {
-		if (this.location) { 
-		 var location = document.getElementById(this.location);
-		 if (location) {
-		 location.addEventListener('click',clickfunction,false);
-	     }
-		}
-	}
-	
-	this.addAction = function (ActionId,Label) {
-	    
-	    this.actions.push(ActionId);
-	    this.actions[ActionId] = new Object;
-	    this.actions[ActionId].id = ActionId;
-	    this.actions[ActionId].label = Label;
-	    this.actions[ActionId].inputs = new Array(0);
-	}
-		
-	
-	this.addActionInput = function (ActionId, InputId, label, type, data, index) {
-		   this.actions[ActionId].inputs.push(InputId);
-		   this.actions[ActionId].inputs[InputId] = new Object();
-		   this.actions[ActionId].inputs[InputId].label = label;
-		   if (type == 'addPrompt') {
-		      this.actions[ActionId].inputs[InputId].prompt = data;
-		   }
-		   if (type == 'addChoice') {
-			   this.actions[ActionId].inputs[InputId].choices = data;		   
-		   }
-		   if (type == 'modifyValue') {
-			   this.actions[ActionId].inputs[InputId].label = label;
-			   this.actions[ActionId].inputs[InputId].currentindex = index;
-		   }
-		   if (type == 'modifyChoice') {
-			   this.actions[ActionId].inputs[InputId].label = label;
-			   this.actions[ActionId].inputs[InputId].currentindex = index;
-			   this.actions[ActionId].inputs[InputId].choices = data;	
-		   }
-	}
-	
-	this.setActionRemoveParameters = function (ActionId, header, currentdata,removeobject,warning,inputlabel) {
-		this.actions[ActionId].remove = new Object();
-		this.actions[ActionId].remove.header = header;
-		this.actions[ActionId].remove.currentdata = currentdata;
-		this.actions[ActionId].remove.removeobject = removeobject;
-		this.actions[ActionId].remove.warning = warning;
-		this.actions[ActionId].remove.inputlabel = inputlabel;
-	}
-	
-	this.setActionModifyParameters = function (ActionId,header, currentdata,modifyobject,currentrow) {
-		this.actions[ActionId].modify = new Object();
-		this.actions[ActionId].modify.header = header;
-		this.actions[ActionId].modify.currentdata = currentdata;
-		this.actions[ActionId].modify.modifyobject = modifyobject;
-		this.actions[ActionId].modify.currentrow = currentrow; 
-	}
-	
-	this.addActionCancel = function (ActionId, label, cancelclick) {
-		   this.actions[ActionId].cancel = new Object();
-		   this.actions[ActionId].cancel.label = label;
-		   this.actions[ActionId].cancel.click = cancelclick;
-	}
-	
-	this.addActionSubmit = function (ActionId, label, submitclick) {
-		   this.actions[ActionId].submit = new Object();
-		   this.actions[ActionId].submit.label = label;
-		   this.actions[ActionId].submit.click = submitclick;
-	}
-	
-	this.setActionClick = function(ActionId,type) {
-		var form = new formBuilder();
-		var forminfo = this.actions[ActionId];
-		if (type == 'removeForm') {
-			this.actions[ActionId].click = function() {form.removeForm(forminfo)};
-		}
-		if (type == 'modifyForm') {
-			this.actions[ActionId].click = function() {form.modifyForm(forminfo)};
-			}
-	}
+
+function secondsidebarToolbar (content) {
+	this.content = content;
 }
 
-function secondsidebarToolbar () {
+secondsidebarToolbar.prototype.load = function() {
 	
-	this.init = function () {
+    var self=this;
+	var bldform = new formBuilder();
+	
+    function removeForm (option) {
+    	option.clickform.parameters.cancel.onclick =
+		     function() {bldform.resultBanner ('Failure',option.clickform.parameters.cancel.text)};
+ 		 var thisFunction = function(){bldform.removeForm(option)};
+ 		 return thisFunction;
+ 	    }
+    
+    function modifyForm (option) {
+ 		 var thisFunction = function(){bldform.modifyForm(option)};
+ 		 return thisFunction;
+ 	    }
+	
 	  var ssToolbarContents = document.getElementById("secondSidebarTopMenu"); 
 	  ssToolbarContents.innerHTML = ""; //clear existing toolbar
 	  var ssToolbarUl = ssToolbarContents.appendChild(document.createElement('ul'));
@@ -194,11 +124,12 @@ function secondsidebarToolbar () {
 	  ssToolbarLeftButtonIcon.className = "secondSidebarBackIcon";
 	  ssToolbarLeftButtonIcon.src= "images/back-icon.png";
 	  ssToolbarLeftButton.appendChild(ssToolbarLeftButtonIcon);
+	  ssToolbarLeftButtonIcon.addEventListener('click',self.content.leftbutton.onclick,false);
 	  
 	  var ssToolbarCentre = document.createElement('li');
 	  ssToolbarCentre.id = "secondSidebarTopMenuButtonCentre";
 	  ssToolbarCentre.className = "secondSidebarTopMenuButtonCentre";
-	  ssToolbarCentre.innerHTML= '';
+	  ssToolbarCentre.innerHTML= self.content.banner;
 	  ssToolbarUl.appendChild(ssToolbarCentre);
 	  
 	  var ssToolbarRightButton = document.createElement('li');
@@ -213,354 +144,281 @@ function secondsidebarToolbar () {
 	  ssToolbarRightButtonIcon.className = "secondSidebarActionIcon";
 	  ssToolbarRightButtonIcon.src= "images/topmenu-icon-grey.png";
 	  ssToolbarRightDiv.appendChild(ssToolbarRightButtonIcon);
-	}
-  
-    this.setLeftButtonClick = function (clickfunction) {
-    	var ssToolbarLeftButtonIcon = document.getElementsByClassName("secondSidebarBackIcon");	
-    	ssToolbarLeftButtonIcon[0].addEventListener('click',clickfunction,false);
-    }
-    
-    this.rightButton = new secondsidebarOption('Toolbar','secondSidebarTopMenuActionsIcon','hasactions');
-    
-    this.setRightButtonClick = function (clickfunction) {
-    	this.rightButton.setClick(clickfunction);   			
-    }
-    
-	this.addAction = function (ActionId,Label) {
-	    this.rightButton.addAction(ActionId,Label);
-	}	
-	
-	this.addActionInput = function (ActionId, InputId, label, type, data, index) {
-		this.rightButton.addActionInput(ActionId, InputId, label, type, data, index);
-	}
-	
-	this.addActionCancel = function (ActionId, label, cancelclick) {
-		this.rightButton.addActionCancel(ActionId, label, cancelclick);
-	}
-	
-	this.addActionSubmit = function (ActionId, label, submitclick) {
-		 this.rightButton.addActionSubmit(ActionId, label, submitclick);
-	}
-	
-	this.setActionClick = function(ActionId,type) {
-         this.rightButton.setActionClick(ActionId,type);
-	}
-	
-	this.setActionRemoveParameters = function (ActionId, header,currentdata,removeobject,warning,inputlabel) {
-		this.rightButton.setActionRemoveParameters(ActionId, header,currentdata,removeobject,warning,inputlabel);
-	}
-	this.setActionModifyParameters = function (ActionId, header,currentdata,modifyobject,currentrow) {
-		this.rightButton.setActionModifyParameters(ActionId, header,currentdata,modifyobject,currentrow);
-	}
-	this.clear = function() {
-		var ssToolbarContents = document.getElementById("secondSidebarTopMenu"); 
-	    ssToolbarContents.innerHTML = "";
-	}
-	
-	this.setBanner = function(label) {
-		var banner = document.getElementById("secondSidebarTopMenuButtonCentre");
-		 banner.innerHTML = label;
-	}
-
+	  self.content.rightbutton.location = 'secondSidebarTopMenuActionsIcon';
+	  
+	    	for (var j in self.content.rightbutton.actions) {
+	    	  thisoption = self.content.rightbutton;
+		      if (thisoption.actions[j].clickform.type == 'removeForm') {
+			  
+			  thisoption.actions[j].onclick = removeForm(thisoption.actions[j]);
+		      }
+		      if (thisoption.actions[j].clickform.type == 'modifyForm') {
+		      thisoption.actions[j].onclick  = modifyForm(thisoption.actions[j]);
+			  }
+	    	}
+	    	
+	   ssToolbarRightButtonIcon.addEventListener('click',function() {bldform.dropdownForm(self.content.rightbutton)},false);
 }
 
-function secondsidebarMenu () {
+
+
+
+
+
+function secondsidebarMenu (content) {
+	this.content = content;
+}
+
+secondsidebarMenu.prototype.load = function() {
 	
-  this.init = function() {
+	var self=this;
+	var bldform = new formBuilder();
+	
+	   function dropdownForm(option){
+		   var thisFunction = function(){bldform.dropdownForm(option)};
+	 		 return thisFunction;
+	   }
+	
+	   function removeForm (option) {
+	    	option.clickform.parameters.cancel.onclick =
+			     function() {bldform.resultBanner ('Failure',option.clickform.parameters.cancel.text)};
+	 		 var thisFunction = function(){bldform.removeForm(option)};
+	 		 return thisFunction;
+	 	    }
+	    
+	    function modifyForm (option) {
+	 		 var thisFunction = function(){bldform.modifyForm(option)};
+	 		 return thisFunction;
+	 	    }
+	    
 	var thisMenuList = document.getElementById('secondSidebarSideMenu'); 
 	thisMenuList.innerHTML = '<ul style="margin:0"></ul>';
-	 this.options = new Array(0);
-  }
+    var menuUl = document.getElementById('secondSidebarSideMenu').childNodes[0];
+    
+    for (var i in self.content.options) {
+	var optionLi = document.createElement('li');
+    optionLi.innerHTML= self.content.options[i].label;
+	optionLi.className = "secondSidebarSideMenuButton";
+	optionLi.id = "secondSidebar" + self.content.options[i].id;
+	menuUl.appendChild(optionLi);	
+	 if (self.content.options[i].onclick) {
+		optionLi.addEventListener('click',self.content.options[i].onclick,false);
+		self.content.options[i].location = optionLi.id;
+	 }
+	 else {
+	  var thisoption = self.content.options[i];
+	  if (thisoption.actions.length > 0 ) { 
+	    var optionIconDiv = document.createElement('div');
+	    optionIconDiv.className = 'secondSidebarSideMenuActionButton';
+	    optionIconDiv.id = optionLi.id + 'IconDiv';     
+	   	optionLi.appendChild(optionIconDiv);
+	    var icon = document.createElement('img');
+	    icon.className = 'secondSidebarActionIcon';
+	    icon.id = optionLi.id + 'Icon';
+	    icon.src = 'images/dropdown-icon-grey.png';
+	    icon.setAttribute("onmouseover" , "this.src=\'images/dropdown-icon-orange.png\'");
+	    icon.setAttribute("onmouseout" , "this.src=\'images/dropdown-icon-grey.png\'");
+	    optionIconDiv.appendChild(icon);
+	    thisoption.location = icon.id;
+	    for (var j in thisoption.actions) {
+	    	  
+	  	      if (thisoption.actions[j].clickform.type == 'removeForm') {
+	  		  
+	  		  thisoption.actions[j].onclick = removeForm(thisoption.actions[j]);
+	  	      }
+	  	      if (thisoption.actions[j].clickform.type == 'modifyForm') {
+	  	      thisoption.actions[j].onclick  = modifyForm(thisoption.actions[j]);
+	  		  }
+	    	}
+	    icon.addEventListener('click',dropdownForm(thisoption),false);
+	   } 
+	 }
+   }  
  
-  this.addOption = function (OptionId, label, type) {
-	    var menuUl = document.getElementById('secondSidebarSideMenu').childNodes[0];
-		var optionLi = document.createElement('li');
-	    optionLi.innerHTML= label;
-		optionLi.className = "secondSidebarSideMenuButton";
-		optionLi.id = "secondSidebar" + OptionId;
-		menuUl.appendChild(optionLi);	
-		
-		if (type == 'hasactions') {
-		    var optionIconDiv = document.createElement('div');
-		    optionIconDiv.className = 'secondSidebarSideMenuActionButton';
-		    optionIconDiv.id = optionLi.id + 'IconDiv';     
-		   	optionLi.appendChild(optionIconDiv);
-		    var icon = document.createElement('img');
-		    icon.className = 'secondSidebarActionIcon';
-		    icon.id = optionLi.id + 'Icon';
-		    icon.src = 'images/dropdown-icon-grey.png';
-		    icon.setAttribute("onmouseover" , "this.src=\'images/dropdown-icon-orange.png\'");
-		    icon.setAttribute("onmouseout" , "this.src=\'images/dropdown-icon-grey.png\'");
-		    optionIconDiv.appendChild(icon);
-		}
-		
-	  this.options.push(OptionId);
-	  if (type == 'noactions') {
-	  this.options[OptionId] = new secondsidebarOption(OptionId,optionLi.id,type);
-      }
-	  if (type == 'hasactions') {
-		  this.options[OptionId] = new secondsidebarOption(OptionId,optionLi.id + 'Icon',type);
-	      }
-  }
-	
-	
-	this.clear = function() {
-		var ssToolbarContents = document.getElementById("secondSidebarTopMenu"); 
-	    ssToolbarContents.innerHTML = "";
-	}
-
 }
 
 
-function mainpanelToolbar () {
-	
-	this.init = function() {
-	var mpToolbarContents = document.getElementById("mainPanelToolbarMenu"); 
-    mpToolbarContents.innerHTML = "<ul id=\"mainPanelToolbarMenuList\">" +
-                                 "<li class=\"mainPanelToolbarBanner\"></li></ul>";
-	}
-	
-    this.options = new Array(0);
-	
-	this.clear = function() {
-		var mpToolbarContents = document.getElementById("mainPanelToolbarMenu"); 
-	    mpToolbarContents.innerHTML = "";
-	}
-	
-	this.setBanner = function(name) {
-		var mpToolbarBanner = document.getElementsByClassName("mainPanelToolbarBanner");
-		 mpToolbarBanner[0].innerHTML = name;
-	}
-	
-	this.setOptionClick = function(OptionId,type) {
-		var toolbarIcon = document.getElementById("mainPanelToolbarIcon"+OptionId); 
-		var form = new formBuilder();
-		var thisOption = this.options[OptionId];
-		if (type == 'addForm') {
-		toolbarIcon.addEventListener('click',function(){form.addForm(thisOption)}, false);
-		}
-		if (type == 'helpForm') {
-			toolbarIcon.addEventListener('click',function(){form.helpForm(thisOption)}, false);
-			}
-	}
+function mainpanelToolbar (config) {
+	this.config = config;
+}
+
+mainpanelToolbar.prototype.load = function() {
+  
+        
+	    var self=this;
+		var bldform = new formBuilder();
 		
-	this.addOption = function (OptionId,OptionIconImage,OptionHeader) {
-		   var mpToolbarList =  document.getElementById("mainPanelToolbarMenu"); 
+	    function addForm (option) {
+	 		 var thisFunction = function(){bldform.addForm(option)};
+	 		 return thisFunction;
+	 	    }
+	    
+	    function helpForm (option) {
+	 		 var thisFunction = function(){bldform.helpForm(option)};
+	 		 return thisFunction;
+	 	    }
+		
+		
+		var mpToolbarContents = document.getElementById("mainPanelToolbarMenu"); 
+	    mpToolbarContents.innerHTML = "<ul id=\"mainPanelToolbarMenuList\">" +
+	                                 "<li class=\"mainPanelToolbarBanner\"></li></ul>";
+		var mpToolbarBanner = document.getElementsByClassName("mainPanelToolbarBanner");
+		 mpToolbarBanner[0].innerHTML = this.config.banner;
+		   for (var i in self.config.options) {
+			self.config.options[i].parent = 'mainPanelDataForms';
+			self.config.options[i].inputclass = 'MPTdropdownInput';
+		    
+			var mpToolbarList =  document.getElementById("mainPanelToolbarMenu"); 
 		    var optionLi = document.createElement('li');
+		    mpToolbarList.appendChild(optionLi);
 		    var toolbarIconDiv = optionLi.appendChild(document.createElement('div'));
-		    toolbarIconDiv.id = "mainPanelToolbarButton" + OptionId;
+		    toolbarIconDiv.id = "mainPanelToolbarButton" + self.config.options[i].id;
 		    toolbarIconDiv.className = "mainPanelToolbarButton" ;
 		    var toolbarIcon = toolbarIconDiv.appendChild(document.createElement('img'));
 		    toolbarIcon.className = "mainPanelToolbarIcon";
-		    toolbarIcon.id = "mainPanelToolbarIcon"+OptionId;
-		    toolbarIcon.src = "images/" + OptionIconImage;
+		    toolbarIcon.id = "mainPanelToolbarIcon"+self.config.options[i].id;
+		    toolbarIcon.src = "images/" + self.config.options[i].icon;
 		    
-		    this.options.push(OptionId);
-		    this.options[OptionId] = new Object;
-		    this.options[OptionId].id = OptionId;
-		    this.options[OptionId].parent = 'mainPanelDataForms';
-		    this.options[OptionId].inputclass = 'MPTdropdownInput';
-		    this.options[OptionId].header = OptionHeader;
-		    this.options[OptionId].inputs = new Array(0);
-	
-		    if (mpToolbarList) {
-				mpToolbarList.appendChild(optionLi);
-			}
-	}
-	
-	this.setOptionHelpfile = function (OptionId, file) {
-		this.options[OptionId].helpfile = file;
-	}
-	
-	this.addOptionInput = function (OptionId, InputId, label, type, data) {
-		   this.options[OptionId].inputs.push(InputId);
-		   this.options[OptionId].inputs[InputId] = new Object();
-		   this.options[OptionId].inputs[InputId].label = label;
-		   if (type == 'addPrompt') {
-		      this.options[OptionId].inputs[InputId].prompt = data;
+		    if (this.config.options[i].clickform.type == 'addForm') {
+		    	toolbarIcon.addEventListener('click',addForm(self.config.options[i]), false);	    	
+		    }
+		    if (this.config.options[i].clickform.type == 'helpForm') {
+		    	this.config.options[i].clickform.parameters.submit.onclick = function() {bldform.dropdownDestroyAll()};
+		    	toolbarIcon.addEventListener('click',helpForm(self.config.options[i]), false);	    	
+		    }		    
 		   }
-		   if (type == 'addChoice') {
-			   this.options[OptionId].inputs[InputId].choices = data;
-		   }
-	}
-	
-	this.addOptionSubmit = function (OptionId, label, submitclick) {
-		   this.options[OptionId].submit = new Object();
-		   this.options[OptionId].submit.label = label;
-		   this.options[OptionId].submit.click = submitclick;
-	}
-	
 }
 
-function mainpanelTable() {
-	
-	function isEven(x) { return (x%2)==0; }
-	function isOdd(x) { return !isEven(x); }
-	
-	this.headerRows = 0;
-	
-	this.init = function(container,tableid) {
-	var mpTableContainer = document.getElementById(container);
-	if (!document.getElementById(tableid)) { //create a new blank table
-    var mpTableResults = document.createElement('table');
-    mpTableResults.id = tableid;
-    mpTableResults.className = "mainPanelTable";
-    mpTableResults.innerHTML = "";
-    mpTableContainer.appendChild(mpTableResults);
-	} else { // already exists so blank current contents
-		var mpTableResults = document.getElementById(tableid);
-		mpTableResults.innerHTML = "";
+
+
+function mainpanelDataForms (content) {	
+	this.content = content;
+}
+
+mainpanelDataForms.prototype.addRow = function(tableid,row) {
+	var self = this;
+	var index = 0; var table_found = false;
+	while ((index < self.content.tables.length) && (!table_found)) {
+		if (self.content.tables[index].id == tableid) {table_found = true;}
+		else {index++;}
 	}
-	}
+	if (table_found) {self.content.tables[index].rows.push(row);}
 	
-	this.addHeader = function (tableid,rows,headings) {
-		this.headerRows = rows;
-		var mpTableResults = document.getElementById(tableid);
-	    var tr_oddStyle = "class=\"mainPanelTable-tr-odd\"";
-	    var tr_evenStyle = "class=\"mainPanelTable-tr-even\"";
-	    var th_singlestyle = "style= \"border-left: 1px solid; border-right: 1px solid\"";
-	    var th_line1style = "style= \"text-align:center;border:1px solid\" colspan=\"2\"";
-	    var th_line2style = "style= \"border-left: 1px solid; border-right: 1px solid\"";
-	    
-	    if (rows == 2) {
-	    	   var row1_heading_html = "";
-	    	   var row2_heading_html = "";
-	    	   for (var i=0; i<headings/2; i++) {
-	    		   row1_heading_html += "<th " + th_line1style + "></th>";
-	    	   }
-	    	   for (var i=0; i<headings; i++) {
-	    		   row2_heading_html += "<th " + th_line2style + "></th>";
-	    	   }
-		       mpTableResults.innerHTML =  "<tr " + tr_evenStyle + ">" + row1_heading_html + "</tr>";
-		       mpTableResults.innerHTML += "<tr " + tr_evenStyle + ">" + row2_heading_html + "</tr>";
-	    } else {
-	    	if (rows == 1) {
-	    	   	   var row_heading_html = "";  
-	        	   for (i=0; i<headings; i++) {
-	        		   row_heading_html += "<th " + th_singlestyle + "></th>";
-	        	   }
-	        	   mpTableResults.innerHTML =  "<tr " + tr_evenStyle + ">" + row_heading_html + "</tr>";
-	      } else {
-	    	   mpTableResults.innerHTML = "";
-	        }
-	    }
-	}
+}
 	
-	this.addRow = function (tableid,index, cells) {
+mainpanelDataForms.prototype.load = function() {
+	  var self = this;
+	  
+	  
+		var isEven = function(x) { return (x%2)==0; }
+		var isOdd  = function(x) { return !isEven(x); }
 		
-		var mpTableResults = document.getElementById(tableid);
-
-	    var newrow = mpTableResults.insertRow(index);
-	        if (this.headerRows == 1) {
-	         if (isEven(index)) { newrow.className = "mainPanelTable-tr-odd"; }
-	         else { newrow.className = "mainPanelTable-tr-even"; }
-	        }
-	        if (this.headerRows == 2) {
-		     if (isEven(index)) { newrow.className = "mainPanelTable-tr-even"; }
-		     else { newrow.className = "mainPanelTable-tr-odd"; }   	
-	        }
-	        for (var i=0;i<cells;i++) {
-	        	var newcell = newrow.insertCell(i);
-	        }
-	}
-	 
-	this.setCell = function (tableid, row, cell, html) {
-		var mpTableResults = document.getElementById(tableid);
-		mpTableResults.rows[row].cells[cell].innerHTML = html;
-	}
-	
-	this.setCellAsButton = function(tableid, row, cell, buttonlabel, buttonOnClickFunction) {
-		  var mpTableResults = document.getElementById(tableid);
-		  var button_oddClass = "mainPanelTableButtonOdd";
-		  var button_evenClass = "mainPanelTableButtonEven";
-		  if (isEven(row)) { mpTableResults.rows[row].cells[cell].className = button_oddClass;}
-		  else {mpTableResults.rows[row].cells[cell].className = button_evenClass;}  
-		mpTableResults.rows[row].cells[cell].addEventListener('click',buttonOnClickFunction);
-		mpTableResults.rows[row].cells[cell].innerHTML = buttonlabel;
-	}
-	
-	
-	this.setCellAsAction = function(tableid, row, cell, buttonlabel,  header) {
-		  var thisCell = document.getElementById(tableid).rows[row].cells[cell];
-		  thisCell.id = tableid + String(document.getElementById(tableid).rows[row].rowIndex) + String(document.getElementById(tableid).rows[row].cells[cell].cellIndex);
-		  if (isEven(row)) { thisCell.className = "mainPanelTableButtonOdd";} else {thisCell.className = "mainPanelTableButtonEven";}  
-		   thisCell.action = new Object();
-		   thisCell.action.inputs = new Array(0);
-		   thisCell.action.parent = 'mainPanelDataForms';
-		   thisCell.action.header = header;
-		   thisCell.action.id = buttonlabel;
-		   thisCell.innerHTML = buttonlabel;
-	}
-	
-	this.setCellActionClick = function(tableid, row, cell,type) {
-		var thisCell = document.getElementById(tableid).rows[row].cells[cell];
-		var form = new formBuilder();
-		if (type == 'addForm') {
-		thisCell.addEventListener('click',function() {form.addForm(thisCell.action)}, false);
+		function loadHeader (table) {
+			
+			var mpTableResults = document.getElementById(table.id);
+		    var tr_oddStyle = "class=\"mainPanelTable-tr-odd\"";
+		    var tr_evenStyle = "class=\"mainPanelTable-tr-even\"";
+		    var th_singlestyle = "style= \"border-left: 1px solid; border-right: 1px solid\"";
+		    var th_line1style = "style= \"text-align:center;border:1px solid\" colspan=\"2\"";
+		    var th_line2style = "style= \"border-left: 1px solid; border-right: 1px solid\"";
+		    
+		    if (table.header.length == 2) {
+		    	   var row1_heading_html = "";
+		    	   var row2_heading_html = "";
+		    	   for (var i=0; i<table.header[0].titles.length; i++) {
+		    		   row1_heading_html += "<th " + th_line1style + ">" + table.header[0].titles[i] + "</th>";
+		    	   }
+		    	   for (var i=0; i<table.header[1].titles.length; i++) {
+		    		   row2_heading_html += "<th " + th_line2style + ">" + table.header[1].titles[i] + "</th>";
+		    	   }
+			       mpTableResults.innerHTML =  "<tr " + tr_evenStyle + ">" + row1_heading_html + "</tr>";
+			       mpTableResults.innerHTML += "<tr " + tr_evenStyle + ">" + row2_heading_html + "</tr>";
+		    } else {
+		    	if (table.header.length == 1) {
+		    	   	   var row_heading_html = "";  
+			    	   for (var i=0; i<table.header[0].titles.length; i++) {
+			    		   row_heading_html += "<th " + th_singlestyle + ">" + table.header[0].titles[i] + "</th>";
+			    	   }
+		        	   mpTableResults.innerHTML =  "<tr " + tr_evenStyle + ">" + row_heading_html + "</tr>";
+		      } else {
+		    	   mpTableResults.innerHTML = "";
+		        }
+		    }
 		}
-		if (type == 'helpForm') {
-			thisCell.addEventListener('click',function() {form.helpForm(thisCell.action)}, false);
-			}
-	}
-	
-	this.addCellActionInput = function(tableid, row, cell, InputId, label, type, data) {
-		  var thisCell = document.getElementById(tableid).rows[row].cells[cell];
-		   thisCell.action.inputs.push(InputId);
-		   thisCell.action.inputs[InputId] = new Object();
-		   thisCell.action.inputs[InputId].label = label;
-		   if (type == 'addPrompt') {
-			   thisCell.action.inputs[InputId].prompt = data;
-		   }
-		   if (type == 'addChoice') {
-			   thisCell.action.inputs[InputId].choices = data;
-		   }
-	}
-		   
-	this.addCellActionSubmit = function (tableid, row, cell,label, submitclick) {
-		 var thisCell = document.getElementById(tableid).rows[row].cells[cell];
-			 thisCell.action.submit = new Object();
-			 thisCell.action.submit.label = label;
-			 thisCell.action.submit.click = submitclick;
-			}
-}
+		
+		function loadRow (table,index) {
+			var self = this;	
+			var bldform = new formBuilder();
+			
+		    function addForm (option) {
+		 		 var thisFunction = function(){bldform.addForm(option)};
+		 		 return thisFunction;
+		 	    }
+		    
+			var mpTableResults = document.getElementById(table.id);
+		    var newrow = mpTableResults.insertRow(parseInt(index) + parseInt(table.header.length));
+		    
+		        if (isEven(index)) { newrow.className = "mainPanelTable-tr-even"; }
+		         else { newrow.className = "mainPanelTable-tr-odd"; }
 
-function mainpanelDataForms () {
-	
-	this.init = function() {
+		        for (var i in table.rows[index].cells) {
+		        	var thisrow = table.rows[index];
+		        	var newcell = newrow.insertCell(i);
+		        	if (thisrow.cells[i].type == 'text') {newcell.innerHTML = thisrow.cells[i].text;}   
+		        	if (thisrow.cells[i].type == 'button') {
+		      		  if (isEven(index)) { newcell.className = "mainPanelTableButtonEven";} else {newcell.className = "mainPanelTableButtonOdd";}  
+		      		  newcell.addEventListener('click',thisrow.cells[i].onclick);
+		      		  newcell.innerHTML = thisrow.cells[i].text;
+		      	    }
+		        	if (thisrow.cells[i].type == 'action') {
+		    		  newcell.id = table.id + String(parseInt(index) + parseInt(table.header.length)) + String(j);
+		    		  thisrow.cells[i].action.parent = 'mainPanelDataForms';
+		      		  if (isEven(index)) { newcell.className = "mainPanelTableButtonEven";} else {newcell.className = "mainPanelTableButtonOdd";}       		  
+		      	      if (thisrow.cells[i].action.clickform.type == 'addForm') {
+				    	newcell.addEventListener('click',addForm(thisrow.cells[i].action), false);	
+				    	newcell.innerHTML = thisrow.cells[i].action.label;
+				      }   		
+		        	}
+		        }
+		}
+		
+	  // clear any current contents from DOM
 	  var mpDataFormsContents = document.getElementById("mainPanelDataForms"); 
-	    mpDataFormsContents.innerHTML = "";
-	    this.tables = new Array(0);
-	}
+	      mpDataFormsContents.innerHTML = "";
 	
+	 // load content to DOM   
+	 for (var i in self.content.tables) {
+		var thistable = self.content.tables[i];
+		var mpContainer = document.getElementById('mainPanelDataForms');
+		if (!document.getElementById(thistable.id)) { //create a new blank table
+	    var mpTableResults = document.createElement('table');
+	    mpTableResults.id = thistable.id;
+	    mpTableResults.className = "mainPanelTable";
+	    mpTableResults.innerHTML = "";
+	    mpContainer.appendChild(mpTableResults);
 
-	
-	this.clear = function() {
-		var mpToolbarContents = document.getElementById("mainPanelDataForms"); 
-	    mpToolbarContents.innerHTML = "";
-	}
-		
-	this.addTable = function (tableid) {
-		this.tables.push(tableid);
-		this.tables[tableid] = new mainpanelTable();
-		this.tables[tableid].init('mainPanelDataForms',tableid);
-	}
-	
-	this.addSpacer = function (numlines) {	 
-		var mpSpacerContainer = document.getElementById("mainPanelDataForms");
-		var mpSpacer;
-		if (!document.getElementById("mainPanelSpacer")) { //create a new blank table
-	    mpSpacer = document.createElement('p');
-	    mpSpacer.id = "mainPanelSpacer";
-	    mpSpacerContainer.appendChild(mpSpacer);
-		} else { // already exists
-		   mpSpacer = document.getElementById("mainPanelSpacer");
+
+		} else { // already exists so blank current contents
+			var mpTableResults = document.getElementById(thistable.id);
+			mpTableResults.innerHTML = "";
 		}
-		var text = ""; var j;
-		for (j=0; j< numlines; j++) {text += "<br/>";}
-		mpSpacer.innerHTML = text;
-	}
-
+	    loadHeader(thistable);
+	    for (var j in thistable.rows) {
+	      loadRow(thistable,j);
+	    }
+	    if (thistable.spacer) {
+	        var mpSpacer = document.createElement('p');
+		    mpSpacer.id = "mainPanelSpacer";
+		    mpContainer.appendChild(mpSpacer);
+			var text = ""; var j;
+			for (j=0; j< thistable.spacer.rows; j++) {text += "<br/>";}
+			mpSpacer.innerHTML = text;
+	     }
+	 }
 }
+
+
+
 
 
 function formBuilder () {
@@ -651,11 +509,11 @@ formBuilder.prototype.dropdownForm = function (forminfo) {
 	    	    var thisAction = document.createElement('li');
 	    	    thisAction.className = "SSdropdown-li";
 	    	    var actionid = iconActions[i];
+	    	    if (iconActions[i].id) { actionid = i;} 
 	    	    if (iconActions[actionid] != undefined) {
-	    	    if (iconActions[actionid].forminfo != undefined) {thisAction.forminfo = iconActions[actionid].forminfo;}
 	    	    if (iconActions[actionid].label != undefined) {thisAction.innerHTML = iconActions[actionid].label;}
 	    	    dropdownUl.appendChild(thisAction);
-	            if (iconActions[actionid].click != undefined) {thisAction.addEventListener('click',iconActions[actionid].click,false);}
+	            if (iconActions[actionid].onclick != undefined) {thisAction.addEventListener('click',iconActions[actionid].onclick,false);}
 	    	    }
 	          }
 	          }
@@ -676,6 +534,7 @@ formBuilder.prototype.addForm = function(formInfo) {
 				return keydownListener;
 			}
 			
+			var parameters = formInfo.clickform.parameters;
 			var thisOption = document.getElementById(formInfo.parent); 
 			if (thisOption) {
 		    var thisDropdown = document.getElementById("MPTdropdown" + formInfo.id);	
@@ -699,55 +558,57 @@ formBuilder.prototype.addForm = function(formInfo) {
 		    dropdownForm.id = "MPTdropdownForm";
 		    var dropdownFormHeader = dropdownForm.appendChild(document.createElement('p'));
 		    dropdownFormHeader.className = "MPTdropdownFormHeader"; 
-		    dropdownFormHeader.innerHTML = formInfo.header;
+		    dropdownFormHeader.innerHTML = parameters.header;
 		    var dropdownFormTable = dropdownForm.appendChild(document.createElement('table'));
 		    dropdownFormTable.id = "MPTdropdownFormTable";
 		    var dropdownButton = cell2.appendChild(document.createElement('button'));
 		    dropdownButton.className = "MPTdropdownButton";
 		    dropdownButton.id = "MPTdropdownButton";
-		    dropdownButton.innerHTML = formInfo.submit.label;
-		    dropdownButton.addEventListener('click',formInfo.submit.click, false);
-		    
-		    
-		    for (var i=0; i<formInfo.inputs.length; i++) {
-		  	  var thisRow = dropdownFormTable.insertRow(i);
-		  	  var thisLabelCell = thisRow.insertCell(0);
-		  	  var thisInputCell = thisRow.insertCell(1);
-		  	  var inputname = formInfo.inputs[i];
-		  	  if (formInfo.inputs[inputname].prompt) {
-		  	  var thisInput = document.createElement('input');
-		  	  thisInput.className = "MPTdropdownInput";
-		  	  thisInput.type = "text";
-		  	  thisInput.id = "MPTdropdownInput" + inputname;
-		  	  thisInput.fieldindex = i;
-		  	  thisInput.value = formInfo.inputs[inputname].prompt;
-		  	  thisInput.prompt = formInfo.inputs[inputname].prompt;
-		  	  thisInputCell.appendChild(thisInput);
-		  	  thisInput.onkeydown = keydownFunction(thisInput.id); 
+		    dropdownButton.innerHTML = parameters.submit.label;
+		    dropdownButton.addEventListener('click',parameters.submit.onclick, false);
+		     
+		     if (parameters.inputs) {
+		      for (var i=0; i<parameters.inputs.length; i++) {
+		  	   var thisRow = dropdownFormTable.insertRow(i);
+		  	   var thisLabelCell = thisRow.insertCell(0);
+		  	   var thisInputCell = thisRow.insertCell(1);
+	           var inputparameters = parameters.inputs[i];
+		  	   if (inputparameters.prompt) {
+		  	   var thisInput = document.createElement('input');
+		  	   thisInput.className = "MPTdropdownInput";
+		  	   thisInput.type = "text";
+		  	   thisInput.id = "MPTdropdownInput" + inputparameters.id;
+		  	   thisInput.fieldindex = i;
+		  	   thisInput.value = inputparameters.prompt;
+		  	   thisInput.prompt = inputparameters.prompt;
+		  	   thisInputCell.appendChild(thisInput);
+		  	   thisInput.onkeydown = keydownFunction(thisInput.id); 
 
-		  	  } else { if (formInfo.inputs[inputname].choices.length > 0) {
-		  		  var thisInput = document.createElement('select');
+		  	   } else { if (inputparameters.choices.length > 0) {
+		  	 	  var thisInput = document.createElement('select');
 		  		  thisInput.className = "MPTdropdownInput";
 		  		  thisInput.type = "text";
-		  		  thisInput.id = "MPTdropdownInput" + inputname;
+		  		  thisInput.id = "MPTdropdownInput" + inputparameters.id;
 		  		  thisInput.fieldindex = i;
 		  		  thisInputCell.appendChild(thisInput);
-		  		  for (var j=0; j<formInfo.inputs[inputname].choices.length; j++) {
+		  		  for (var j=0; j<inputparameters.choices.length; j++) {
 		  			  var thisChoice= document.createElement('option');
 		  			  thisChoice.className = "MPTdropdownChoice";
-		  			  thisChoice.value = formInfo.inputs[inputname].choices[j];
-		  			  thisChoice.innerHTML = formInfo.inputs[inputname].choices[j];
-		  			  thisChoice.id = formInfo.inputs[inputname].id + formInfo.inputs[inputname].choices[j] ;
+		  			  thisChoice.value = inputparameters.choices[j];
+		  			  thisChoice.innerHTML = inputparameters.choices[j];
+		  			  thisChoice.id = inputparameters.id + inputparameters.choices[j] ;
 		  			  thisInput.appendChild(thisChoice);
 		  		  }
+		  	     }
 		  	    }
-		  	  }
+		  	  
 		  	  var thisLabel = document.createElement('p');
 		  	  thisLabel.className = "MPTdropdownInputLabel";
-		  	  thisLabel.innerHTML = formInfo.inputs[inputname].label;
+		  	  thisLabel.innerHTML = inputparameters.label;
 		  	  thisLabelCell.appendChild(thisLabel);
-		    }
+		     }
 			}
+		}
 		}
 }
 	
@@ -755,6 +616,7 @@ formBuilder.prototype.addForm = function(formInfo) {
 formBuilder.prototype.helpForm = function (formInfo) {
 
 	        var self=this;
+			var parameters = formInfo.clickform.parameters;
 			var thisOption = document.getElementById(formInfo.parent); 
 			if (thisOption) {
 		    var thisDropdown = document.getElementById("MPTdropdown" + formInfo.id);	
@@ -776,21 +638,22 @@ formBuilder.prototype.helpForm = function (formInfo) {
 			    var dropdownHelpFrame = cell1.appendChild(document.createElement('iframe'));
 			    dropdownHelpFrame.id = "MPTdropdownHelp";
 			    dropdownHelpFrame.className = "MPTdropdownHelp";
-			    dropdownHelpFrame.setAttribute("src",formInfo.helpfile);
+			    dropdownHelpFrame.setAttribute("src",parameters.helpfile);
 
 			    var dropdownButton = cell2.appendChild(document.createElement('button'));
 			    dropdownButton.className = "MPTdropdownButton";
 			    dropdownButton.id = "MPTdropdownButton";
-			    dropdownButton.innerHTML = formInfo.submit.label;
-			    dropdownButton.addEventListener('click',formInfo.submit.click, false);
+			    dropdownButton.innerHTML = parameters.submit.label;
+			    dropdownButton.addEventListener('click',parameters.submit.onclick, false);
 			  }
 			}	
 	}
 	
 formBuilder.prototype.removeForm = function (formInfo) {
 
-	var self=this;
-		  
+	  var self=this;
+	  var parameters = formInfo.clickform.parameters;
+	  
 	  var thisOption = document.getElementById("mainPanelDataForms"); 
 	  var thisOptionDiv = document.getElementById("SSdropdownOptionFormRemove"); 
 	  if (thisOptionDiv) { 
@@ -814,25 +677,25 @@ formBuilder.prototype.removeForm = function (formInfo) {
 	  dropdownForm.id = "SSdropdownForm";
 	  var dropdownFormHeader = dropdownForm.appendChild(document.createElement('p'));
 	  dropdownFormHeader.className = "SSdropdownFormHeader";  
-	  dropdownFormHeader.innerHTML = formInfo.remove.header+"<br/>"+formInfo.remove.removeobject;
+	  dropdownFormHeader.innerHTML = parameters.header+"<br/>"+parameters.removeobject;
 	  var dropdownFormTable = dropdownForm.appendChild(document.createElement('table'));
 	  dropdownFormTable.id = "SSdropdownFormTable";
 	  
 	  var cancelButton = document.createElement('button');
 	  cancelButton.className = "SSdropdownButton";
 	  cancelButton.id = "SSdropdownButton";
-	  cancelButton.innerHTML = formInfo.cancel.label;
+	  cancelButton.innerHTML = parameters.cancel.label;
 	
 	  var confirmButton = document.createElement('button');
 	  confirmButton.className = "SSdropdownButton";
 	  confirmButton.id = "SSdropdownButton";
-	  confirmButton.innerHTML = formInfo.submit.label;
+	  confirmButton.innerHTML = parameters.submit.label;
 	 
 	  cell1.appendChild(dropdownForm);
 	  cell2.appendChild(cancelButton);
-	  cancelButton.addEventListener("click",formInfo.cancel.click,false );
+	  cancelButton.addEventListener("click",parameters.cancel.onclick,false );
 	  cell2.appendChild(confirmButton);
-	  confirmButton.addEventListener("click",formInfo.submit.click,false );
+	  confirmButton.addEventListener("click",parameters.submit.onclick,false );
 	  
 		  var warningRow = dropdownFormTable.insertRow(0);
 		  var warningCell = warningRow.insertCell(0);
@@ -843,13 +706,13 @@ formBuilder.prototype.removeForm = function (formInfo) {
 		  var retypeInput = document.createElement('input');
 			  retypeInput.className = "SSdropdownInput";
 			  retypeInput.type = "text";
-			  retypeInput.id = formInfo.id + formInfo.remove.inputlabel; 
+			  retypeInput.id = formInfo.id + parameters.inputlabel; 
 			  retypeInput.value = "";
 			  retypeCell.appendChild(retypeInput);
 
 		  var warningPara = document.createElement('p');
 		  warningPara.className = "SSdropdownText";;
-		  warningPara.innerHTML = formInfo.remove.warning;
+		  warningPara.innerHTML = parameters.warning;
 		  warningCell.appendChild(warningPara);
 	  } 
 	}
@@ -857,6 +720,7 @@ formBuilder.prototype.removeForm = function (formInfo) {
 formBuilder.prototype.modifyForm = function (formInfo) {
 	
 	var self=this;
+	 var parameters = formInfo.clickform.parameters;
 	
 	    var thisOption = document.getElementById("mainPanelDataForms"); 
 	    var thisOptionDiv = document.getElementById("SSdropdownOptionFormModify"); 
@@ -881,53 +745,52 @@ formBuilder.prototype.modifyForm = function (formInfo) {
 	    dropdownForm.id = "SSdropdownForm";
 	    var dropdownFormHeader = dropdownForm.appendChild(document.createElement('p'));
 	    dropdownFormHeader.className = "SSdropdownFormHeader"; 
-		var thisObjectId = formInfo.modify.modifyobject;	
-	    dropdownFormHeader.innerHTML = formInfo.modify.header+"<br/>"+thisObjectId;
+		var thisObjectId = parameters.modifyobject;	
+	    dropdownFormHeader.innerHTML = parameters.header+"<br/>"+thisObjectId;
 	    var dropdownFormTable = dropdownForm.appendChild(document.createElement('table'));
 	    dropdownFormTable.id = "SSdropdownFormTable";
 	    var dropdownButton = document.createElement('button');
 	    dropdownButton.className = "SSdropdownButton";
 	    dropdownButton.id = "SSdropdownButton";
-	    dropdownButton.innerHTML = formInfo.submit.label;
-	    dropdownButton.addEventListener('click',formInfo.submit.click );
+	    dropdownButton.innerHTML = parameters.submit.label;
+	    dropdownButton.addEventListener('click',parameters.submit.onclick );
 	    cell1.appendChild(dropdownForm);
 	    cell2.appendChild(dropdownButton);
 
-	    var currentTable = document.getElementById(formInfo.modify.currentdata);
-	    var currentRow = parseInt(formInfo.modify.currentrow);
+	    var currentTable = document.getElementById(parameters.currentdata);
+	    var currentRow = parseInt(parameters.currentrow);
 	    
-	    for (var i=0;i<formInfo.inputs.length;i++) {
+	    for (var i=0;i<parameters.inputs.length;i++) {
 	  	  var thisRow = dropdownFormTable.insertRow(i);
 	  	  var thisLabelCell = thisRow.insertCell(0);
 	  	  var thisInputCell = thisRow.insertCell(1);
-	  	  var inputname = formInfo.inputs[i];
-	  	  
-		  if (!formInfo.inputs[inputname].choices) {
+	  	  var inputparameters = parameters.inputs[i];
+		  if (!inputparameters.choices) {
 			  var thisInput = document.createElement('input');
 			  thisInput.className = "SSdropdownInput";
 			  thisInput.type = "text";
-			  thisInput.id = formInfo.label + formInfo.inputs[inputname].label;
-			  if (currentTable.rows[currentRow].cells[parseInt(formInfo.inputs[inputname].currentindex)]) {
-			  thisInput.value = currentTable.rows[currentRow].cells[parseInt(formInfo.inputs[inputname].currentindex)].innerHTML;
+			  thisInput.id = formInfo.label + inputparameters.label;
+			  if (currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)]) {
+			  thisInput.value = currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)].innerHTML;
 		       }
 			  thisInputCell.appendChild(thisInput);
-			  } else { if (formInfo.inputs[inputname].choices.length > 0) {
+			  } else { if (parameters.inputs[i].choices.length > 0) {
 				  var thisInput = document.createElement('select');
 				  thisInput.className = "SSdropdownInput";
 				  thisInput.type = "text";
-				  thisInput.id = formInfo.label + formInfo.inputs[inputname].label;
+				  thisInput.id = formInfo.label + inputparameters.label;
 				  thisInputCell.appendChild(thisInput);
-				  for (var j=0; j<formInfo.inputs[inputname].choices.length; j++) {
+				  for (var j=0; j<inputparameters.choices.length; j++) {
 					  var thisChoice= document.createElement('option');
 					  thisChoice.className = "SSdropdownChoice";
-					  thisChoice.value = formInfo.inputs[inputname].choices[j];
-					  if (currentTable.rows[currentRow].cells[parseInt(formInfo.inputs[inputname].currentindex)]) {
-					   if (thisChoice.value == currentTable.rows[currentRow].cells[parseInt(formInfo.inputs[inputname].currentindex)].innerHTML) {
+					  thisChoice.value = inputparameters.choices[j];
+					  if (currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)]) {
+					   if (thisChoice.value == currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)].innerHTML) {
 						  thisChoice.selected = 'selected';
 					   }
 					  }
-					  thisChoice.innerHTML = formInfo.inputs[inputname].choices[j];
-					  thisChoice.id = formInfo.label + formInfo.inputs[inputname].label + formInfo.inputs[inputname].choices[j] ;
+					  thisChoice.innerHTML = inputparameters.choices[j];
+					  thisChoice.id = formInfo.label + inputparameters.label + inputparameters.choices[j] ;
 					  thisInput.appendChild(thisChoice);
 				  }
 			    }
@@ -935,7 +798,7 @@ formBuilder.prototype.modifyForm = function (formInfo) {
 	 
 	  	  var thisLabel = document.createElement('p');
 	  	  thisLabel.className = "SSdropdownInputLabel";
-	  	  thisLabel.innerHTML = formInfo.inputs[inputname].label;
+	  	  thisLabel.innerHTML = inputparameters.label;
 	  	  thisLabelCell.appendChild(thisLabel);
 	    }
 	    }
