@@ -161,10 +161,6 @@ secondsidebarToolbar.prototype.load = function() {
 }
 
 
-
-
-
-
 function secondsidebarMenu (content) {
 	this.content = content;
 }
