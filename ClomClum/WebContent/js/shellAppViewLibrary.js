@@ -761,7 +761,18 @@ formBuilder.prototype.modifyForm = function (formInfo) {
 	  	  var thisLabelCell = thisRow.insertCell(0);
 	  	  var thisInputCell = thisRow.insertCell(1);
 	  	  var inputparameters = parameters.inputs[i];
-		  if (!inputparameters.choices) {
+		  if (inputparameters.type == 'modifyAnchor') {
+			  var thisInput = document.createElement('input');
+			  thisInput.className = "SSdropdownInput";
+			  thisInput.type = "text";
+			  thisInput.id = formInfo.label + inputparameters.label;
+			  if (currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)]) {
+			  var thisCell = currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)];
+			  thisInput.value = thisCell.getElementsByTagName('a')[0].getAttribute('href');
+		       }
+			  thisInputCell.appendChild(thisInput);
+			  }
+		  if (inputparameters.type == 'modifyValue') {
 			  var thisInput = document.createElement('input');
 			  thisInput.className = "SSdropdownInput";
 			  thisInput.type = "text";
@@ -770,27 +781,27 @@ formBuilder.prototype.modifyForm = function (formInfo) {
 			  thisInput.value = currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)].innerHTML;
 		       }
 			  thisInputCell.appendChild(thisInput);
-			  } else { if (parameters.inputs[i].choices.length > 0) {
+			  } 
+          if (inputparameters.type == 'modifyChoice') {
 				  var thisInput = document.createElement('select');
 				  thisInput.className = "SSdropdownInput";
 				  thisInput.type = "text";
 				  thisInput.id = formInfo.label + inputparameters.label;
 				  thisInputCell.appendChild(thisInput);
-				  for (var j=0; j<inputparameters.choices.length; j++) {
+				  for (var j=0; j<inputparameters.data.length; j++) {
 					  var thisChoice= document.createElement('option');
 					  thisChoice.className = "SSdropdownChoice";
-					  thisChoice.value = inputparameters.choices[j];
+					  thisChoice.value = inputparameters.data[j];
 					  if (currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)]) {
 					   if (thisChoice.value == currentTable.rows[currentRow].cells[parseInt(inputparameters.currentindex)].innerHTML) {
 						  thisChoice.selected = 'selected';
 					   }
 					  }
-					  thisChoice.innerHTML = inputparameters.choices[j];
-					  thisChoice.id = formInfo.label + inputparameters.label + inputparameters.choices[j] ;
+					  thisChoice.innerHTML = inputparameters.data[j];
+					  thisChoice.id = formInfo.label + inputparameters.label + inputparameters.data[j] ;
 					  thisInput.appendChild(thisChoice);
 				  }
 			    }
-			  }
 	 
 	  	  var thisLabel = document.createElement('p');
 	  	  thisLabel.className = "SSdropdownInputLabel";
